@@ -38,9 +38,8 @@ class Simulation:
         self.beta = [multivariate_normal(mean=zeros(d_j), cov=identity(n=d_j), size=1) for d_j in self.d]
 
         # Simulation results
-        self.u_sim = None
         self.u = None
-        self.theta_sim = None
+        self.theta = None
 
         self.y_zeros = None
         self.y_poisson = None
@@ -66,26 +65,26 @@ class Simulation:
         Make one simulation of the outcome y based on current parameters.
 
         Attributes:
-            self.u_sim: (np.ndarray) 2D array of shape (n, J), n random realizations of the random effect U where
+            self.u: (np.ndarray) 2D array of shape (n, J), n random realizations of the random effect u where
                 .. math::
-                    U \sim N(0, D)
-            self.theta_sim: (List[np.ndarray]) list of length J where
+                    u \sim N(0, D)
+            self.theta: (List[np.ndarray]) list of length J where
                 .. math::
-                    theta_sim_{j} = e^{x_{j} beta_{j}^T + u_sim_{j}^T}
+                    theta_{j} = e^{x_{j} beta_{j}^T + u_{j}^T}
             self.y_zeros: (np.ndarray) 2D array of shape (J, n) that induces structural zeroes
             self.y_poisson: (np.ndarray) 2D array of shape (J, n) with poisson realizations with mean theta_sim
                 .. math::
-                    y_poisson_{i, j} \sim Poisson(lambda=theta_sim_{i, j})
+                    y_poisson_{i, j} \sim Poisson(lambda=theta{i, j})
             self.z_zip: (np.ndarray) 2D array of shape (J, n) with poisson realizations masked
                 by the structural zeros from p_sim
         """
-        self.u_sim = multivariate_normal(size=self.n, mean=zeros(self.J), cov=self.D)
-        self.theta_sim = [exp(
-            matmul(self.x[j], t(self.beta[j])).flatten() + t(self.u_sim)[j]
+        self.u = multivariate_normal(size=self.n, mean=zeros(self.J), cov=self.D)
+        self.theta = [exp(
+            matmul(self.x[j], t(self.beta[j])).flatten() + t(self.u)[j]
         ) for j in range(self.J)]
 
         self.y_zeros = 1 - binomial(size=(self.J, self.n), p=self.p, n=1)
-        self.y_poisson = poisson(lam=self.theta_sim)
+        self.y_poisson = poisson(lam=self.theta)
         self.y_zip = self.y_zeros * self.y_poisson
 
         return self.y_zip
