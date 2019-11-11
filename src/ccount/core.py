@@ -6,7 +6,6 @@
     Core module for correlated count.
 """
 import numpy as np
-import numbers
 
 
 class CorrelatedModel:
@@ -105,13 +104,13 @@ class CorrelatedModel:
         assert self.d.dtype == int
 
         assert isinstance(self.Y, np.ndarray)
-        assert issubclass(self.Y.dtype, numbers.Number)
+        assert self.Y.dtype == np.number
         assert isinstance(self.X, list)
         for X_k in self.X:
             assert isinstance(X_k, list)
             for X_kj in X_k:
                 assert isinstance(X_kj, np.ndarray)
-                assert issubclass(X_kj.dtype, numbers.Number)
+                assert X_kj.dtype == np.number
 
         assert isinstance(self.g, list)
         assert all(callable(g_k) for g_k in self.g)
