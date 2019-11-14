@@ -27,7 +27,7 @@ class CorrelatedModel:
         List of list of 2D arrays, storing the covariates for each parameter
         and outcome.
     g : :obj: `list` of :obj: `function`
-        List of link functions for each parameter.
+        List of inverse link functions for each parameter.
     f : function
         Log likelihood function, better be `numpy.ufunc`.
     beta : :obj: `list` of :obj: `list` of :obj: `numpy.ndarray`
@@ -132,6 +132,37 @@ class CorrelatedModel:
 
         assert len(self.g) == self.l
 
+    def compute_P(self, beta=None, U=None):
+        """Compute the parameter matrix.
+
+        Parameters
+        ----------
+        beta : :obj: `list` of :obj: `list` of :obj: `numpy.ndarray`, optional
+            Fixed effects for predicting the parameters.
+        U : :obj: `numpy.ndarray`, optional
+            Random effects for predicting the parameters. Assume random effects
+            follow multi-normal distribution.
+
+        Returns
+        -------
+        array_like
+            Parameters for each individual and outcome.
+        """
+        if beta is None:
+            beta = self.beta
+        if U is None:
+            U = self.U
+
+        P = np.array([self.X[k][j].dot(beta[k][j])
+                      for k in range(self.l)
+                      for j in range(self.n)])
+        P = P.reshape((self.l, self.n, self.m)).transpose(0, 2, 1)
+        P += U
+        for k in range(self.l):
+            P[k] = self.g[k](P[k])
+
+        return P
+
     def update_params(self, beta=None, U=None, D=None, P=None):
         """Update the variables related to the parameters.
 
@@ -159,21 +190,39 @@ class CorrelatedModel:
         if P is not None:
             self.P = P
         else:
-            P = np.array([self.X[k][j].dot(self.beta[k][j])
-                          for k in range(self.l)
-                          for j in range(self.n)])
-            self.P = P.reshape((self.l, self.n, self.m)).transpose(0, 2, 1)
-            self.P += self.U
-            for k in range(self.l):
-                self.P[k] = self.g[k](self.P[k])
+            self.P = self.compute_P()
 
-    def log_likelihood(self):
+    def log_likelihood(self, beta=None, U=None, D=None):
         """Return the log likelihood of the model.
+
+        Parameters
+        ----------
+        beta : :obj: `list` of :obj: `list` of :obj: `numpy.ndarray`, optional
+            Fixed effects for predicting the parameters.
+        U : :obj: `numpy.ndarray`, optional
+            Random effects for predicting the parameters. Assume random effects
+            follow multi-normal distribution.
+        D : :obj: `numpy.ndarray`, optional
+            Covariance matrix for the random effects distribution.
 
         Returns
         -------
         float
             Average log likelihood.
-
         """
-        return np.mean(self.f(self.Y, self.P))
+        if beta is None:
+            beta = self.beta
+        if U is None:
+            U = self.U
+        if D is None:
+            D = self.D
+
+        P = self.compute_P(beta=beta, U=U)
+        # data likelihood
+        val = np.mean(self.f(self.Y, P))
+        # random effects prior
+        for k in range(self.l):
+            val += 0.5*np.mean(np.sum(U[k].dot(np.linalg.pinv(D[k]))*U[k],
+                                      axis=1))
+
+        return val
