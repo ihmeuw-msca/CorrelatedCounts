@@ -85,3 +85,9 @@ def test_optimization_optimize_U(cm):
     true_U = 0.5*(cm.Y.T[0] - cm.X[0][0].dot(cm.beta[0][0]))
     cm.opt_interface.optimize_U()
     assert np.linalg.norm(true_U - cm.U.flatten()) < 1e-5
+
+
+def test_optimization_compute_D(cm):
+    cm.opt_interface.optimize_U()
+    cm.opt_interface.compute_D()
+    assert np.linalg.norm(cm.D - np.cov(cm.U.flatten())) < 1e-8

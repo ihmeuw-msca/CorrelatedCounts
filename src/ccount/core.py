@@ -230,3 +230,16 @@ class CorrelatedModel:
                                       axis=1))
 
         return val
+
+    def optimize_params(self, max_iters=5):
+        """Optimize the parameters.
+
+        Parameters
+        ----------
+        max_iters : :obj: int, optional
+            Maximum number of iterations.
+        """
+        for i in range(max_iters):
+            self.opt_interface.optimize_beta()
+            self.opt_interface.optimize_U()
+            self.opt_interface.compute_D()
