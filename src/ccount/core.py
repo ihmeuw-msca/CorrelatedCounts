@@ -6,6 +6,7 @@
     Core module for correlated count.
 """
 import numpy as np
+from . import optimization
 
 
 class CorrelatedModel:
@@ -93,6 +94,9 @@ class CorrelatedModel:
 
         # place holder for parameter
         self.P = np.zeros((self.l, self.m, self.n))
+
+        # optimization interface
+        self.opt_interface = optimization.OptimizationInterface(self)
 
     def check(self):
         """Check the type, value and size of the inputs."""
@@ -219,7 +223,7 @@ class CorrelatedModel:
 
         P = self.compute_P(beta=beta, U=U)
         # data likelihood
-        val = np.mean(self.f(self.Y, P))
+        val = np.mean(np.sum(self.f(self.Y, P), axis=1))
         # random effects prior
         for k in range(self.l):
             val += 0.5*np.mean(np.sum(U[k].dot(np.linalg.pinv(D[k]))*U[k],

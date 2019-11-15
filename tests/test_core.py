@@ -24,7 +24,7 @@ X = [[np.random.randn(m, d[k, j])
 def test_correlated_model():
     cm = core.CorrelatedModel(m, n, l, d, Y, X,
                               [lambda x: x] * l,
-                              lambda y, p: 0.5*(y - p)**2)
+                              lambda y, p: 0.5*(y - p[0])**2)
     assert all([np.linalg.norm(cm.beta[k][j]) < 1e-10
                 for k in range(l)
                 for j in range(n)])
@@ -41,7 +41,7 @@ def test_correlated_model():
 def test_correlated_model_compute_P(beta, U):
     cm = core.CorrelatedModel(m, n, l, d, Y, X,
                               [lambda x: x] * l,
-                              lambda y, p: 0.5 * (y - p) ** 2)
+                              lambda y, p: 0.5 * (y - p[0]) ** 2)
     P = cm.compute_P(beta=beta, U=U)
     if beta is None:
         beta = cm.beta
@@ -65,7 +65,7 @@ def test_correlated_model_compute_P(beta, U):
 def test_correlated_model_update_params(beta, U, D, P):
     cm = core.CorrelatedModel(m, n, l, d, Y, X,
                               [lambda x: x] * l,
-                              lambda y, p: 0.5*(y - p)**2)
+                              lambda y, p: 0.5*(y - p[0])**2)
 
     cm.update_params(beta=beta, U=U, D=D, P=P)
     if beta is None:
@@ -92,9 +92,9 @@ def test_correlated_model_update_params(beta, U, D, P):
 def test_correlated_model_log_likelihood(beta, U, D):
     cm = core.CorrelatedModel(m, n, l, d, Y, X,
                               [lambda x: x] * l,
-                              lambda y, p: 0.5*(y - p)**2)
+                              lambda y, p: 0.5*(y - p[0])**2)
 
     cm.update_params(beta=beta, U=U, D=D)
     assert np.abs(cm.log_likelihood() -
-                  0.5*np.mean((cm.Y - cm.P[0])**2) -
+                  0.5*np.mean(np.sum((cm.Y - cm.P[0])**2, axis=1)) -
                   0.5*np.sum(cm.U[0]*cm.U[0])/cm.m) < 1e-10

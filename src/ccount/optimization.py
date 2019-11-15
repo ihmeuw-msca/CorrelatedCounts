@@ -6,6 +6,7 @@
     Optimization module for the Correlated Count.
 """
 import numpy as np
+import scipy.optimize as sopt
 from . import utils
 
 
@@ -102,3 +103,27 @@ class OptimizationInterface:
             c_vec[i] -= eps*1j
 
         return g_vec
+
+    def optimize_beta(self):
+        """Optimize fixed effects.
+        """
+        result = sopt.minimize(self.objective_beta,
+                               utils.beta_to_vec(self.cm.beta),
+                               jac=self.gradient_beta,
+                               method="L-BFGS-B")
+        self.cm.update_params(beta=utils.vec_to_beta(result.x, self.cm.d))
+
+    def optimize_U(self):
+        """Optimize random effects.
+        """
+        result = sopt.minimize(self.objective_U,
+                               self.cm.U.flatten(),
+                               jac=self.gradient_U,
+                               method="L-BFGS-B")
+        self.cm.update_params(U=result.x.reshape(self.cm.U.shape))
+
+    def compute_D(self):
+        """Compute the sample covariance of the random effects.
+        """
+        D = np.array([np.cov(self.cm.U[k].T) for k in range(self.cm.l)])
+        self.cm.update_params(D=D)
