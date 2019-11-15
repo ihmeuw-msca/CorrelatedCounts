@@ -52,5 +52,23 @@ def test_optimization_gradient_beta(cm, beta):
 
     assert np.linalg.norm(opt.gradient_beta(vec) -
                           cm.X[0][0].T.dot(
-                              cm.X[0][0].dot(beta[0][0]) -
+                              cm.X[0][0].dot(beta[0][0]) + cm.U[0].T[0] -
                               cm.Y.T[0])/cm.m) < 1e-8
+
+
+@pytest.mark.parametrize("U", [None, np.ones((l, m, n))])
+def test_optimization_objective_U(cm, U):
+    opt = optimization.OptimizationInterface(cm)
+    if U is None:
+        U = cm.U
+    assert np.abs(opt.objective_U(U.flatten()) - cm.log_likelihood(U=U)) < 1e-10
+
+
+@pytest.mark.parametrize("U", [None, np.ones((l, m, n))])
+def test_optimization_gradient_U(cm, U):
+    opt = optimization.OptimizationInterface(cm)
+    if U is None:
+        U = cm.U
+    assert np.linalg.norm(opt.gradient_U(U.flatten()) -
+                         (cm.X[0][0].dot(cm.beta[0][0]) + U.flatten() -
+                          cm.Y.T[0])/cm.m - U.flatten()/cm.m) < 1e-10

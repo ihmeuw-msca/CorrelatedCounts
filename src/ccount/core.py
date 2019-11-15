@@ -157,7 +157,7 @@ class CorrelatedModel:
                       for k in range(self.l)
                       for j in range(self.n)])
         P = P.reshape((self.l, self.n, self.m)).transpose(0, 2, 1)
-        P += U
+        P = P + U
         for k in range(self.l):
             P[k] = self.g[k](P[k])
 

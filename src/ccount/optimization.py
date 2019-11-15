@@ -98,7 +98,7 @@ class OptimizationInterface:
         c_vec = vec + 0j
         for i in range(vec.size):
             c_vec[i] += eps*1j
-            g_vec[i] = self.objective_beta(c_vec).imag/eps
+            g_vec[i] = self.objective_U(c_vec).imag/eps
             c_vec[i] -= eps*1j
 
         return g_vec
