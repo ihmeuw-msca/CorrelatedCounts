@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/mbannick/CorrelatedCounts.svg?branch=master)](https://travis-ci.org/mbannick/CorrelatedCounts)
+
 # CorrelatedCounts
 Modeling correlated count data based off of the model in Rodrigues-Motta et al 2013<sup>1</sup>.
 
