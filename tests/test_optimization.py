@@ -17,6 +17,7 @@ n = 1
 l = 1
 d = np.array([[2] * n] * l)
 
+
 @pytest.fixture()
 def cm():
     Y = np.random.randn(m, n)
@@ -69,7 +70,7 @@ def test_optimization_gradient_U(cm, U):
     if U is None:
         U = cm.U
     assert np.linalg.norm(opt.gradient_U(U.flatten()) -
-                         (cm.X[0][0].dot(cm.beta[0][0]) + U.flatten() -
+                          (cm.X[0][0].dot(cm.beta[0][0]) + U.flatten() -
                           cm.Y.T[0])/cm.m - U.flatten()/cm.m) < 1e-10
 
 

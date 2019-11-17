@@ -51,6 +51,7 @@ class OptimizationInterface:
         ----------
         vec : array_like
             Provided vectorized fixed effects.
+        eps : float
 
         Returns
         -------
@@ -89,6 +90,7 @@ class OptimizationInterface:
         ----------
         vec : array_like
             Provided vectorized random effects.
+        eps : float
 
         Returns
         -------
