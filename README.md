@@ -15,9 +15,9 @@ Zeroes can appear through two mechanisms: (1) structural zeros with probability 
 distribution. The baseline probability of a structural zero is 0.5.
 
 ```ipython
-In [1]: from ccount.simulate import Simulation
+In [1]: from ccount.simulate import PoissonSimulation
 
-In [2]: s = Simulation(n=3, J=2, d=[2, 2])
+In [2]: s = PoissonSimulation(n=3, J=2, d=[2, 2])
 
 In [3]: s.simulate() # baseline probability of observing a structural zero = 0.5
 Out[3]:
