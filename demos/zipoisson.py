@@ -26,7 +26,7 @@ Y = s_zip.simulate()
 # fit the model
 d = np.array([[1]*n, d])
 X = [[np.ones((m, 1)) for j in range(n)], x]
-
+# true parameters in the right form
 beta = [[np.array([np.log(p/(1.0 - p))]), np.array([np.log(p/(1.0 - p))])],
         [np.array([0.1]), np.array([0.1])]]
 D = np.array([np.eye(n)*1e-10, D])
@@ -36,5 +36,7 @@ P = np.array([np.ones(theta.shape)*p, theta])
 
 m_zip = ZeroInflatedPoisson(m=m, d=d, Y=Y, X=X)
 m_zip.update_params(D=D, U=U)
-m_zip.optimize_params(optimize_U=False, compute_D=False, max_iters=1)
-
+m_zip.optimize_params(optimize_beta=True,
+                      optimize_U=False,
+                      compute_D=False,
+                      max_iters=5)
