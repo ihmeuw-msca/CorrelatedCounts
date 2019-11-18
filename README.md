@@ -1,13 +1,13 @@
 [![Build Status](https://travis-ci.com/mbannick/CorrelatedCounts.svg?branch=master)](https://travis-ci.com/mbannick/CorrelatedCounts)
 
 # CorrelatedCounts
-Modeling correlated count data based off of the model in Rodrigues-Motta et al 2013<sup>1</sup>.
+Modeling correlated count data based off of the model in Rodrigues-Motta et al 2013.<sup>1</sup>
 
 ## Installation
 ```
 git clone https://github.com/mbannick/CorrelatedCounts.git
 cd CorrelatedCounts
-pip install .
+python setup.py install
 ```
 
 ## Usage
@@ -46,5 +46,5 @@ array([[0, 0, 0],
 
 ### References
 
-<sup>1</sup>Mariana Rodrigues-Motta, Hildete P. Pinheiro, Eduardo G. Martins, Márcio S. Araújo & Sérgio F. dos Reis (2013) Multivariate models for correlated count data, Journal of Applied Statistics, 40:7, 1586-1596, DOI: 10.1080/02664763.2013.789098
+<sup>1</sup> Mariana Rodrigues-Motta, Hildete P. Pinheiro, Eduardo G. Martins, Márcio S. Araújo & Sérgio F. dos Reis (2013) Multivariate models for correlated count data, Journal of Applied Statistics, 40:7, 1586-1596, DOI: 10.1080/02664763.2013.789098
 
