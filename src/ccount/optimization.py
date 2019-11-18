@@ -8,6 +8,9 @@
 import numpy as np
 import scipy.optimize as sopt
 from . import utils
+import logging
+
+LOG = logging.getLogger(__name__)
 
 
 class OptimizationInterface:
@@ -58,6 +61,7 @@ class OptimizationInterface:
         numpy.ndarray
             Gradient at current fixed effects.
         """
+        LOG.debug("Computing the gradient for beta.")
         g_vec = np.zeros(vec.size)
         c_vec = vec + 0j
         for i in range(vec.size):
@@ -97,6 +101,7 @@ class OptimizationInterface:
         numpy.ndarray
             Gradient at current random effects.
         """
+        LOG.debug("Computing the gradient for U.")
         g_vec = np.zeros(vec.size)
         c_vec = vec + 0j
         for i in range(vec.size):
@@ -109,6 +114,7 @@ class OptimizationInterface:
     def optimize_beta(self):
         """Optimize fixed effects.
         """
+        LOG.info("Optimizing beta.")
         result = sopt.minimize(self.objective_beta,
                                utils.beta_to_vec(self.cm.beta),
                                jac=self.gradient_beta,
@@ -118,6 +124,7 @@ class OptimizationInterface:
     def optimize_U(self):
         """Optimize random effects.
         """
+        LOG.info("Optimizing U.")
         result = sopt.minimize(self.objective_U,
                                self.cm.U.flatten(),
                                jac=self.gradient_U,
@@ -125,6 +132,7 @@ class OptimizationInterface:
         self.cm.update_params(U=result.x.reshape(self.cm.U.shape))
 
     def compute_D(self):
+        LOG.info("Computing D.")
         """Compute the sample covariance of the random effects.
         """
         D = np.array([np.cov(self.cm.U[k].T) for k in range(self.cm.l)])
