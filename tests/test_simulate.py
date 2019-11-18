@@ -24,7 +24,7 @@ def poisson_sim():
     return np.array(
         [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
          [194, 0, 0, 3, 1, 2, 0, 2, 0, 0]]
-    )
+    ).T
 
 
 def test_simulate(m, n, d):
