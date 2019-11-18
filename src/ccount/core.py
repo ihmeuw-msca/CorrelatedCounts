@@ -274,4 +274,4 @@ class CorrelatedModel:
             if compute_D:
                 self.opt_interface.compute_D()
                 LOG.debug(f"Current D is {self.D}")
-            print("objective function value %8.2e" % self.log_likelihood())
+            print("objective function value %8.2e" % self.neg_log_likelihood())
