@@ -25,27 +25,22 @@ class ZeroInflatedPoisson(CorrelatedModel):
         super().__init__(
             m=m, n=2, d=d, Y=Y.astype(np.number), X=X,
             l=2, g=[lambda x: np.exp(x) / (1 + np.exp(x)), np.exp],
-            f=self.zip_neg_log_likelihood
+            f=zip_neg_log_likelihood
         )
 
-    @staticmethod
-    def zip_neg_log_likelihood(Y, P):
-        """
-        The negative log likelihood for
-        zero-inflated Poisson.
 
-        Parameters
-        ----------
-        Y : array_like
-        P : list
-        """
-        p = P[0]
-        theta = P[1]
-        likelihood = ((p + (1 - p) * np.exp(-theta)) * (Y == 0) +
-                      ((1 - p) * np.exp(-theta) * theta ** Y) * (1 - (Y == 0)))
-        try:
-            assert np.isfinite(likelihood).all()
-            assert (likelihood != 0).all()
-        except AssertionError:
-            import pdb; pdb.set_trace()
-        return -np.log(likelihood)
+def zip_neg_log_likelihood(Y, P):
+    """
+    The negative log likelihood for
+    zero-inflated Poisson.
+
+    Parameters
+    ----------
+    Y : array_like
+    P : list
+    """
+    p = P[0]
+    theta = P[1]
+    likelihood = ((p + (1 - p) * np.exp(-theta)) * (Y == 0) +
+                  ((1 - p) * np.exp(-theta) * theta ** Y) * (1 - (Y == 0)))
+    return -np.log(likelihood)
