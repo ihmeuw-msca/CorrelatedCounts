@@ -40,6 +40,8 @@ class PoissonSimulation(Simulation):
 
     >>> s.update_params(p=0.2)
     >>> s.simulate()
+
+    >>> s.x[0] = np.ones((s.m, 1)) # get rid of covariates for the first parameter
     """
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -54,9 +56,9 @@ class PoissonSimulation(Simulation):
         self.u = None
         self.theta = None
 
-        self.y_zeros = None
-        self.y_poisson = None
-        self.y_zip = None
+        self.Y_zeros = None
+        self.Y_poisson = None
+        self.Y_zip = None
 
     def update_params(self, x=None, beta=None, p=None, D=None):
         """
@@ -92,7 +94,7 @@ class PoissonSimulation(Simulation):
             2D array of shape (m, n), m random realizations
             of the random effect u where
             .. math::
-                u \sim N(0, D)
+                u ~ N(0, D)
         self.theta : List[np.ndarray]
             list of length J where
             .. math::
@@ -104,7 +106,7 @@ class PoissonSimulation(Simulation):
             2D array of shape (n, m) with poisson
             realizations with mean theta_sim
             .. math::
-                y_poisson_{i, j} \sim Poisson(lambda=theta{i, j})
+                y_poisson_{i, j} ~ Poisson(lambda=theta{i, j})
         self.y_zip : np.ndarray
             2D array of shape (n, m) with poisson
             realizations masked by the structural zeros from p_sim
@@ -115,9 +117,9 @@ class PoissonSimulation(Simulation):
         self.theta = [np.exp(self.x[j].dot(self.beta[j]) + self.u.T[j])
                       for j in range(self.n)]
 
-        self.y_zeros = 1 - np.random.binomial(size=(self.n, self.m),
+        self.Y_zeros = 1 - np.random.binomial(size=(self.n, self.m),
                                               p=self.p, n=1)
-        self.y_poisson = np.random.poisson(lam=self.theta)
-        self.y_zip = self.y_zeros * self.y_poisson
+        self.Y_poisson = np.random.poisson(lam=self.theta)
+        self.Y_zip = self.Y_zeros * self.Y_poisson
 
-        return self.y_zip
+        return self.Y_zip.T

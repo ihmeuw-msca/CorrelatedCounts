@@ -7,6 +7,9 @@
 """
 import numpy as np
 from . import optimization
+import logging
+
+LOG = logging.getLogger(__name__)
 
 
 class CorrelatedModel:
@@ -31,6 +34,7 @@ class CorrelatedModel:
         List of inverse link functions for each parameter.
     f : function
         Log likelihood function, better be `numpy.ufunc`.
+        Needs to return an an array in the same shape as Y
     beta : :obj: `list` of :obj: `list` of :obj: `numpy.ndarray`
         Fixed effects for predicting the parameters.
     U : array_like
@@ -101,6 +105,7 @@ class CorrelatedModel:
     def check(self):
         """Check the type, value and size of the inputs."""
         # types
+        LOG.info("Checking the types of inputs...")
         assert isinstance(self.m, int)
         assert isinstance(self.n, int)
         assert isinstance(self.l, int)
@@ -119,14 +124,18 @@ class CorrelatedModel:
         assert isinstance(self.g, list)
         assert all(callable(g_k) for g_k in self.g)
         assert callable(self.f)
+        LOG.info("...passed.")
 
         # values
+        LOG.info("Checking the values of inputs...")
         assert self.m > 0
         assert self.n > 0
         assert self.l > 0
         assert np.all(self.d > 0)
+        LOG.info("...passed.")
 
         # sizes
+        LOG.info("Checking the sizes of inputs...")
         assert self.Y.shape == (self.m, self.n)
         assert len(self.X) == self.l
         assert all(len(self.X[k]) == self.n for k in range(self.l))
@@ -135,6 +144,7 @@ class CorrelatedModel:
                    for j in range(self.n))
 
         assert len(self.g) == self.l
+        LOG.info("...passed.")
 
     def compute_P(self, beta=None, U=None):
         """Compute the parameter matrix.
@@ -164,7 +174,10 @@ class CorrelatedModel:
         P = P + U
         for k in range(self.l):
             P[k] = self.g[k](P[k])
-
+            try:
+                assert np.isfinite(P[k]).all()
+            except AssertionError:
+                raise ValueError(f"Must have finite values for P. Found non-finite values for parameter {k}")
         return P
 
     def update_params(self, beta=None, U=None, D=None, P=None):
@@ -231,7 +244,7 @@ class CorrelatedModel:
 
         return val
 
-    def optimize_params(self, max_iters=5):
+    def optimize_params(self, max_iters=10):
         """Optimize the parameters.
 
         Parameters
@@ -239,7 +252,12 @@ class CorrelatedModel:
         max_iters : :obj: int, optional
             Maximum number of iterations.
         """
+        LOG.info("Optimizing the parameters.")
         for i in range(max_iters):
+            LOG.info(f"On iteration {i}...")
             self.opt_interface.optimize_beta()
+            LOG.debug(f"Current beta is {self.beta}")
             self.opt_interface.optimize_U()
+            LOG.debug(f"Current U is {self.U}")
             self.opt_interface.compute_D()
+            LOG.debug(f"Current D is {self.D}")
