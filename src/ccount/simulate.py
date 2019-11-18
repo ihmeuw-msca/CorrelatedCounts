@@ -94,7 +94,7 @@ class PoissonSimulation(Simulation):
             2D array of shape (m, n), m random realizations
             of the random effect u where
             .. math::
-                u \sim N(0, D)
+                u ~ N(0, D)
         self.theta : List[np.ndarray]
             list of length J where
             .. math::
@@ -106,7 +106,7 @@ class PoissonSimulation(Simulation):
             2D array of shape (n, m) with poisson
             realizations with mean theta_sim
             .. math::
-                y_poisson_{i, j} \sim Poisson(lambda=theta{i, j})
+                y_poisson_{i, j} ~ Poisson(lambda=theta{i, j})
         self.y_zip : np.ndarray
             2D array of shape (n, m) with poisson
             realizations masked by the structural zeros from p_sim
