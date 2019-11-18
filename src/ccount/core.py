@@ -209,8 +209,8 @@ class CorrelatedModel:
         else:
             self.P = self.compute_P()
 
-    def log_likelihood(self, beta=None, U=None, D=None):
-        """Return the log likelihood of the model.
+    def neg_log_likelihood(self, beta=None, U=None, D=None):
+        """Return the negative log likelihood of the model.
 
         Parameters
         ----------
@@ -244,20 +244,34 @@ class CorrelatedModel:
 
         return val
 
-    def optimize_params(self, max_iters=10):
+    def optimize_params(self,
+                        max_iters=10,
+                        optimize_beta=True,
+                        optimize_U=True,
+                        compute_D=True):
         """Optimize the parameters.
 
         Parameters
         ----------
         max_iters : :obj: int, optional
             Maximum number of iterations.
+        optimize_beta: :obj: bool, optional
+            Indicate if optimize beta every iteration.
+        optimize_U: :obj: bool, optional
+            Indicate if optimize U every iteration.
+        compute_D: :obj: bool, optional
+            Indicate if compute D every iteration.
         """
         LOG.info("Optimizing the parameters.")
         for i in range(max_iters):
             LOG.info(f"On iteration {i}...")
-            self.opt_interface.optimize_beta()
-            LOG.debug(f"Current beta is {self.beta}")
-            self.opt_interface.optimize_U()
-            LOG.debug(f"Current U is {self.U}")
-            self.opt_interface.compute_D()
-            LOG.debug(f"Current D is {self.D}")
+            if optimize_beta:
+                self.opt_interface.optimize_beta()
+                LOG.debug(f"Current beta is {self.beta}")
+            if optimize_U:
+                self.opt_interface.optimize_U()
+                LOG.debug(f"Current U is {self.U}")
+            if compute_D:
+                self.opt_interface.compute_D()
+                LOG.debug(f"Current D is {self.D}")
+            print("objective function value %8.2e" % self.log_likelihood())
