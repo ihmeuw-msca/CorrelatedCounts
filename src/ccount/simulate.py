@@ -9,7 +9,7 @@ class Simulation:
         for each n.
 
         Parameters
-        -----------
+        ----------
             m : int
                 Number of individuals in the simulation
             n : int
@@ -34,7 +34,7 @@ class PoissonSimulation(Simulation):
     Simulate data from a Correlated Poisson
 
     Example
-    ----------
+    -------
     >>> s = PoissonSimulation(m=100, n=2, d=[2, 2])
     >>> s.simulate()
 

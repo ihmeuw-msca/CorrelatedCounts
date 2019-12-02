@@ -45,7 +45,7 @@ class OptimizationInterface:
             Objective function value.
         """
         beta = utils.vec_to_beta(vec, self.cm.d)
-        return self.cm.log_likelihood(beta=beta)
+        return self.cm.neg_log_likelihood(beta=beta)
 
     def gradient_beta(self, vec, eps=1e-10):
         """Gradient function for fitting the fixed effects.
@@ -85,7 +85,7 @@ class OptimizationInterface:
             Objective function value.
         """
         U = vec.reshape(self.cm.U.shape)
-        return self.cm.log_likelihood(U=U)
+        return self.cm.neg_log_likelihood(U=U)
 
     def gradient_U(self, vec, eps=1e-10):
         """Gradient function for fitting the random effects.

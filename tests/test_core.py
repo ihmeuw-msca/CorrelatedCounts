@@ -89,12 +89,12 @@ def test_correlated_model_update_params(beta, U, D, P):
 @pytest.mark.parametrize("U", [None, np.zeros((l, m, n))])
 @pytest.mark.parametrize("D", [None,
                                np.array([np.identity(n) for i in range(l)])])
-def test_correlated_model_log_likelihood(beta, U, D):
+def test_correlated_model_neg_log_likelihood(beta, U, D):
     cm = core.CorrelatedModel(m, n, l, d, Y, X,
                               [lambda x: x] * l,
                               lambda y, p: 0.5*(y - p[0])**2)
 
     cm.update_params(beta=beta, U=U, D=D)
-    assert np.abs(cm.log_likelihood() -
+    assert np.abs(cm.neg_log_likelihood() -
                   0.5*np.mean(np.sum((cm.Y - cm.P[0])**2, axis=1)) -
                   0.5*np.sum(cm.U[0]*cm.U[0])/cm.m) < 1e-10

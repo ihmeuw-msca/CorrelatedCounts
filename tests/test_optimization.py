@@ -37,7 +37,7 @@ def test_optimization_objective_beta(cm, beta):
     if beta is None:
         beta = cm.beta
     vec = utils.beta_to_vec(beta)
-    assert np.abs(cm.log_likelihood(beta=beta) -
+    assert np.abs(cm.neg_log_likelihood(beta=beta) -
                   opt.objective_beta(vec)) < 1e-10
 
 
@@ -61,7 +61,7 @@ def test_optimization_objective_U(cm, U):
     opt = cm.opt_interface
     if U is None:
         U = cm.U
-    assert np.abs(opt.objective_U(U.flatten()) - cm.log_likelihood(U=U)) < 1e-10
+    assert np.abs(opt.objective_U(U.flatten()) - cm.neg_log_likelihood(U=U)) < 1e-10
 
 
 @pytest.mark.parametrize("U", [None, np.ones((l, m, n))])
