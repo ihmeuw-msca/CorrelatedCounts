@@ -237,6 +237,10 @@ class CorrelatedModel:
         P = self.compute_P(beta=beta, U=U)
         # data likelihood
         val = np.mean(np.sum(self.f(self.Y, P), axis=1))
+        try:
+            assert np.isfinite(val)
+        except AssertionError:
+            raise ValueError(f"The data likelihood is {val}, which is not finite.")
         # random effects prior
         for k in range(self.l):
             val += 0.5*np.mean(np.sum(U[k].dot(np.linalg.pinv(D[k]))*U[k],
