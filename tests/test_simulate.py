@@ -1,7 +1,7 @@
 import pytest
 import numpy as np
 
-from ccount.simulate import Simulation, PoissonSimulation
+from ccount.simulate import Simulation, ZIPoissonSimulation
 
 
 @pytest.fixture
@@ -37,7 +37,7 @@ def test_simulate(m, n, d):
 def test_poisson_simulation(m, n, d, poisson_sim):
     np.random.seed(0)
 
-    s = PoissonSimulation(m=m, n=n, d=d)
+    s = ZIPoissonSimulation(m=m, n=n, d=d)
     assert s.p == 0.5
     s.update_params(p=0.4)
     assert s.p == 0.4
