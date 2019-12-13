@@ -5,7 +5,7 @@ import logging
 LOG = logging.getLogger(__name__)
 
 
-class HurdleModel(CorrelatedModel):
+class HurdlePoissonModel(CorrelatedModel):
     """
     A Hurdle Model. Has a binomial model
     for the proportion of zeros, and a zero-truncated
@@ -27,8 +27,8 @@ class ZeroInflatedPoisson(CorrelatedModel):
     A Zero-Inflated Poisson Model.
 
     Example:
-    >>> from ccount.simulate import PoissonSimulation
-    >>> ps = PoissonSimulation(m=100, n=2, d=[2, 2])
+    >>> from ccount.simulate import ZIPoissonSimulation
+    >>> ps = ZIPoissonSimulation(m=100, n=2, d=[2, 2])
     >>> Y = ps.simulate()
     >>> X = [[np.ones((ps.m, 1)) for i in range(ps.n)], ps.x]
     >>> D = np.array([[1, 1], ps.d])
@@ -44,6 +44,9 @@ class ZeroInflatedPoisson(CorrelatedModel):
             l=2, g=[lambda x: np.exp(x) / (1 + np.exp(x)), np.exp],
             f=zip_neg_log_likelihood
         )
+
+    def fitted_values(self):
+        return (1 - self.P[0]) * self.P[1]
 
 
 def hurdle_neg_log_likelihood(Y, P):
