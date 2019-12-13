@@ -1,4 +1,6 @@
 import numpy as np
+from scipy.stats import rv_discrete
+from scipy.special import gamma
 
 
 class Simulation:
@@ -28,37 +30,10 @@ class Simulation:
         self.n = n
         self.d = d
 
-
-class PoissonSimulation(Simulation):
-    """
-    Simulate data from a Correlated Poisson
-
-    Example
-    -------
-    >>> s = PoissonSimulation(m=100, n=2, d=[2, 2])
-    >>> s.simulate()
-
-    >>> s.update_params(p=0.2)
-    >>> s.simulate()
-
-    >>> s.x[0] = np.ones((s.m, 1)) # get rid of covariates for the first parameter
-    """
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-
-        # Baseline simulation parameters
-        self.p = 0.5
-        self.D = np.identity(n=self.n)
-        self.x = [np.random.randn(self.m, self.d[j]) for j in range(self.n)]
-        self.beta = [np.random.randn(self.d[j]) for j in range(self.n)]
-
-        # Simulation results
-        self.u = None
-        self.theta = None
-
-        self.Y_zeros = None
-        self.Y_poisson = None
-        self.Y_zip = None
+        self.x = None
+        self.beta = None
+        self.p = None
+        self.D = None
 
     def update_params(self, x=None, beta=None, p=None, D=None):
         """
@@ -83,6 +58,83 @@ class PoissonSimulation(Simulation):
             self.p = p
         if D is not None:
             self.D = D
+
+
+class HurdlePoissonSimulation(Simulation):
+    """
+    Simulate data from a Hurdle Correlated Poisson model
+    """
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+        self.update_params(
+            x=[np.random.randn(self.m, self.d[j]) for j in range(self.n)],
+            beta=[np.random.randn(self.d[j]) for j in range(self.n)],
+            D=np.identity(n=self.n),
+            p=0.5
+        )
+
+        class TruncatedPoisson(rv_discrete):
+            """Modified Poisson RV so that it cannot produce 0's."""
+            def _pmf(self, k, mu):
+                return (mu ** k) / ((np.exp(mu) - 1) * gamma(k.astype(int)+1))
+
+        self.truncated_poisson = TruncatedPoisson(name='truncated_poisson', a=1, b=np.inf)
+
+        # Simulation results
+        self.u = None
+        self.theta = None
+
+        self.Y_zeros = None
+        self.Y_poisson = None
+        self.Y_hp = None
+
+    def simulate(self):
+        self.u = np.random.multivariate_normal(size=self.m,
+                                               mean=np.zeros(self.n),
+                                               cov=self.D)
+        self.theta = [np.exp(self.x[j].dot(self.beta[j]) + self.u.T[j])
+                      for j in range(self.n)]
+        self.Y_zeros = 1 - np.random.binomial(size=(self.n, self.m),
+                                              p=self.p, n=1)
+        self.Y_poisson = self.truncated_poisson.rvs(mu=self.theta)
+        self.Y_hp = self.Y_zeros * self.Y_poisson
+
+        return self.Y_hp.T
+
+
+class ZIPoissonSimulation(Simulation):
+    """
+    Simulate data from a Correlated Poisson
+
+    Example
+    -------
+    >>> s = ZIPoissonSimulation(m=100, n=2, d=[2, 2])
+    >>> s.simulate()
+
+    >>> s.update_params(p=0.2)
+    >>> s.simulate()
+
+    >>> s.x[0] = np.ones((s.m, 1)) # get rid of covariates for the first parameter
+    """
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+        # Baseline simulation parameters
+        self.update_params(
+            x=[np.random.randn(self.m, self.d[j]) for j in range(self.n)],
+            beta=[np.random.randn(self.d[j]) for j in range(self.n)],
+            D=np.identity(n=self.n),
+            p=0.5
+        )
+
+        # Simulation results
+        self.u = None
+        self.theta = None
+
+        self.Y_zeros = None
+        self.Y_poisson = None
+        self.Y_zip = None
 
     def simulate(self):
         """
