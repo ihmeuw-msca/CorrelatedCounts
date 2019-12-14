@@ -194,6 +194,7 @@ class CorrelatedModel:
                       for k in range(self.l)
                       for j in range(self.n)])
         P = P.reshape((self.l, self.n, self.m)).transpose(0, 2, 1)
+        U = np.repeat(U, self.group_sizes, axis=1)
         P = P + U
         for k in range(self.l):
             P[k] = self.g[k](P[k])
