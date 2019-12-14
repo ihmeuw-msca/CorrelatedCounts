@@ -21,10 +21,13 @@ X = [[np.random.randn(m, d[k, j])
       for j in range(n)] for k in range(l)]
 
 
-def test_correlated_model():
+@pytest.mark.parametrize("group_id",
+                         [None, np.array([1, 1, 2, 2, 3])])
+def test_correlated_model(group_id):
     cm = core.CorrelatedModel(m, n, l, d, Y, X,
                               [lambda x: x] * l,
-                              lambda y, p: 0.5*(y - p[0])**2)
+                              lambda y, p: 0.5*(y - p[0])**2,
+                              group_id=group_id)
     assert all([np.linalg.norm(cm.beta[k][j]) < 1e-10
                 for k in range(l)
                 for j in range(n)])
@@ -32,6 +35,9 @@ def test_correlated_model():
     assert all([np.linalg.norm(cm.D[k] - np.identity(n)) < 1e-10
                 for k in range(l)])
     assert np.linalg.norm(cm.P) < 1e-10
+
+    if group_id is not None:
+        assert cm.U.shape == (cm.l, 3, cm.n)
 
 
 @pytest.mark.parametrize("beta",
