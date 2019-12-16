@@ -47,7 +47,7 @@ class CorrelatedModel:
 
     """
 
-    def __init__(self, m, n, l, d, Y, X, g, f):
+    def __init__(self, m, n, l, d, Y, X, g, f, group_id=None):
         """Correlated Model initialization method.
 
         Parameters
@@ -68,15 +68,23 @@ class CorrelatedModel:
         g : :obj: `list` of :obj: `function`
             List of link functions for each parameter.
         f : function
-            Log likelihood function, better be `numpy.ufunc`.
-
+            Negative log likelihood function, better be `numpy.ufunc`.
+        group_id: :obj: `numpy.ndarray`, optional
+            Optional integer group id, gives the way of grouping the random
+            effects. When it is not `None`, it should have length `m`.
         """
         # dimension
         self.m = m
         self.n = n
         self.l = l
         self.d = d
-        
+
+        # grouping of the random effects
+        if group_id is None:
+            self.group_id = np.arange(self.m)
+        else:
+            self.group_id = group_id
+
         # data and covariates
         self.Y = Y
         self.X = X
@@ -88,12 +96,24 @@ class CorrelatedModel:
         # check input
         self.check()
 
+        # group the data with group_id
+        sort_id = np.argsort(self.group_id)
+        self.group_id = self.group_id[sort_id]
+        self.Y = self.Y[sort_id]
+        for k in range(self.l):
+            for j in range(self.n):
+                self.X[k][j] = self.X[k][j][sort_id]
+
+        self.unique_group_id, self.group_sizes = np.unique(self.group_id,
+                                                           return_counts=True)
+        self.num_groups = self.unique_group_id.size
+
         # fixed effects
         self.beta = [[np.zeros(self.d[k, j])
                       for j in range(self.n)] for k in range(self.l)]
 
         # random effects and its covariance matrix
-        self.U = np.zeros((self.l, self.m, self.n))
+        self.U = np.zeros((self.l, self.num_groups, self.n))
         self.D = np.array([np.identity(self.n) for k in range(self.l)])
 
         # place holder for parameter
@@ -110,7 +130,9 @@ class CorrelatedModel:
         assert isinstance(self.n, int)
         assert isinstance(self.l, int)
         assert isinstance(self.d, np.ndarray)
+        assert isinstance(self.group_id, np.ndarray)
         assert self.d.dtype == int
+        assert self.group_id.dtype == int
 
         assert isinstance(self.Y, np.ndarray)
         assert self.Y.dtype == np.number
@@ -144,6 +166,7 @@ class CorrelatedModel:
                    for j in range(self.n))
 
         assert len(self.g) == self.l
+        assert self.group_id.shape == (self.m,)
         LOG.info("...passed.")
 
     def compute_P(self, beta=None, U=None):
@@ -171,6 +194,7 @@ class CorrelatedModel:
                       for k in range(self.l)
                       for j in range(self.n)])
         P = P.reshape((self.l, self.n, self.m)).transpose(0, 2, 1)
+        U = np.repeat(U, self.group_sizes, axis=1)
         P = P + U
         for k in range(self.l):
             P[k] = self.g[k](P[k])
