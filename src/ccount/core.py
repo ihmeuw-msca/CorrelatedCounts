@@ -167,6 +167,12 @@ class CorrelatedModel:
 
         assert len(self.g) == self.l
         assert self.group_id.shape == (self.m,)
+
+        try:
+            assert np.isfinite(self.X).all()
+        except AssertionError:
+            raise ValueError("There are non-finite values for the covariates.")
+
         LOG.info("...passed.")
 
     def compute_P(self, beta=None, U=None):
@@ -198,10 +204,6 @@ class CorrelatedModel:
         P = P + U
         for k in range(self.l):
             P[k] = self.g[k](P[k])
-            try:
-                assert np.isfinite(P[k]).all()
-            except AssertionError:
-                raise ValueError(f"Must have finite values for P. Found non-finite values for parameter {k}")
         return P
 
     def update_params(self, beta=None, U=None, D=None, P=None):
@@ -261,10 +263,6 @@ class CorrelatedModel:
         P = self.compute_P(beta=beta, U=U)
         # data likelihood
         val = np.mean(np.sum(self.f(self.Y, P), axis=1))
-        try:
-            assert np.isfinite(val)
-        except AssertionError:
-            raise ValueError(f"The data likelihood is {val}, which is not finite.")
         # random effects prior
         for k in range(self.l):
             val += 0.5*np.mean(np.sum(U[k].dot(np.linalg.pinv(D[k]))*U[k],
