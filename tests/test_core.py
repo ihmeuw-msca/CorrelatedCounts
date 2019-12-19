@@ -53,7 +53,7 @@ def test_correlated_model_compute_P(group_id, beta, U):
                               group_id=group_id)
     if U is not None:
         U = np.ones((cm.m, cm.num_groups, cm.n))
-    P = cm.compute_P(beta=beta, U=U)
+    P = cm.compute_P(beta=beta, U=U, X=cm.X, m=cm.m, group_sizes=cm.group_sizes)
     if beta is None:
         beta = cm.beta
     if U is None:

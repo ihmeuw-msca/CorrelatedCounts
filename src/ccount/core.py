@@ -255,7 +255,7 @@ class CorrelatedModel:
         if P is not None:
             self.P = P
         else:
-            self.P = self.compute_P()
+            self.P = self.compute_P(X=self.X, m=self.m, group_sizes=self.group_sizes)
 
     def neg_log_likelihood(self, beta=None, U=None, D=None):
         """Return the negative log likelihood of the model.
