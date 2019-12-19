@@ -22,9 +22,10 @@ class HurdlePoisson(CorrelatedModel):
             f=NegLogLikelihoods.hurdle_poisson
         )
 
-    def fitted_values(self):
-        p = self.P[0]
-        theta = self.P[1]
+    @staticmethod
+    def mean_outcome(P):
+        p = P[0]
+        theta = P[1]
         return (1 - p) * theta / (1 - np.exp(-theta))
 
 
@@ -51,9 +52,10 @@ class ZeroInflatedPoisson(CorrelatedModel):
             f=NegLogLikelihoods.zi_poisson
         )
 
-    def fitted_values(self):
-        p = self.P[0]
-        theta = self.P[1]
+    @staticmethod
+    def mean_outcome(P):
+        p = P[0]
+        theta = P[1]
         return (1 - p) * theta
 
 
@@ -71,8 +73,9 @@ class NegativeBinomial(CorrelatedModel):
             f=NegLogLikelihoods.nbinom
         )
 
-    def fitted_values(self):
-        theta = self.P[0]
-        k = self.P[1]
+    @staticmethod
+    def fitted_values(P):
+        theta = P[0]
+        k = P[1]  # The over-dispersion parameter is not used for the mean value calculation
         return theta
 
