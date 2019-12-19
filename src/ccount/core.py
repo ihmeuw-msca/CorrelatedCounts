@@ -6,6 +6,7 @@
     Core module for correlated count.
 """
 import numpy as np
+from copy import deepcopy
 from ccount import optimization
 import logging
 
@@ -99,10 +100,9 @@ class CorrelatedModel:
         # group the data with group_id
         sort_id = np.argsort(self.group_id)
         self.group_id = self.group_id[sort_id]
+
         self.Y = self.Y[sort_id]
-        for k in range(self.l):
-            for j in range(self.n):
-                self.X[k][j] = self.X[k][j][sort_id]
+        self.X = self.sort_X(X=self.X, sort_id=sort_id)
 
         self.unique_group_id, self.group_sizes = np.unique(self.group_id,
                                                            return_counts=True)
@@ -169,17 +169,40 @@ class CorrelatedModel:
         assert self.group_id.shape == (self.m,)
 
         try:
-            assert np.isfinite(self.X).all()
+            for k in self.X:
+                for j in k:
+                    assert np.isfinite(j).all()
         except AssertionError:
             raise ValueError("There are non-finite values for the covariates.")
 
         LOG.info("...passed.")
 
-    def compute_P(self, beta=None, U=None):
+    def sort_X(self, X, sort_id):
+        """
+        Sorts the list of lists of input arrays by the sort ID.
+        Args:
+            X: list of list of np.ndarray
+            sort_id: np.array
+
+        Returns:
+            sorted_X: list of list of np.ndarray sorted by sort_id
+        """
+        sorted_X = deepcopy(X)
+        for k in range(self.l):
+            for j in range(self.n):
+                sorted_X[k][j] = sorted_X[k][j][sort_id]
+        return sorted_X
+
+    def compute_P(self, X, m, group_sizes, beta=None, U=None):
         """Compute the parameter matrix.
 
         Parameters
         ----------
+        X : :obj: `list` of :obj: `list` of :obj: `numpy.ndarray`
+            Covariates matrix
+        m : `int`
+            Number of individuals
+        group_sizes : :obj: `np.ndarray` indicating the sizes of each group
         beta : :obj: `list` of :obj: `list` of :obj: `numpy.ndarray`, optional
             Fixed effects for predicting the parameters.
         U : :obj: `numpy.ndarray`, optional
@@ -196,11 +219,11 @@ class CorrelatedModel:
         if U is None:
             U = self.U
 
-        P = np.array([self.X[k][j].dot(beta[k][j])
+        P = np.array([X[k][j].dot(beta[k][j])
                       for k in range(self.l)
                       for j in range(self.n)])
-        P = P.reshape((self.l, self.n, self.m)).transpose(0, 2, 1)
-        U = np.repeat(U, self.group_sizes, axis=1)
+        P = P.reshape((self.l, self.n, m)).transpose(0, 2, 1)
+        U = np.repeat(U, group_sizes, axis=1)
         P = P + U
         for k in range(self.l):
             P[k] = self.g[k](P[k])
@@ -233,7 +256,7 @@ class CorrelatedModel:
         if P is not None:
             self.P = P
         else:
-            self.P = self.compute_P()
+            self.P = self.compute_P(X=self.X, m=self.m, group_sizes=self.group_sizes)
 
     def neg_log_likelihood(self, beta=None, U=None, D=None):
         """Return the negative log likelihood of the model.
@@ -260,7 +283,7 @@ class CorrelatedModel:
         if D is None:
             D = self.D
 
-        P = self.compute_P(beta=beta, U=U)
+        P = self.compute_P(beta=beta, U=U, m=self.m, X=self.X, group_sizes=self.group_sizes)
         # data likelihood
         val = np.mean(np.sum(self.f(self.Y, P), axis=1))
         # random effects prior
@@ -301,3 +324,105 @@ class CorrelatedModel:
                 self.opt_interface.compute_D()
                 LOG.debug(f"Current D is {self.D}")
             print("objective function value %8.2e" % self.neg_log_likelihood())
+
+    def check_new_X(self, X, group_id):
+        """
+        Check a new X matrix and associated group ID to make sure
+        dimensions and types line up with what is expected and was used to fit the model.
+
+        Args:
+            X : :obj: `list` of :obj: `list` of :obj: `numpy.ndarray`
+                List of list of 2D arrays, storing the covariates for each parameter
+                and outcome.
+            group_id: :obj: `numpy.ndarray` way of grouping the random effects
+        """
+        assert isinstance(X, list)
+        for X_k in X:
+            assert isinstance(X_k, list)
+            for X_kj in X_k:
+                assert isinstance(X_kj, np.ndarray)
+                assert X_kj.dtype == np.number
+        assert len(self.X) == self.l
+        assert all(len(self.X[k]) == self.n for k in range(self.l))
+        assert all(self.X[k][j].shape == (len(group_id), self.d[k, j])
+                   for k in range(self.l)
+                   for j in range(self.n))
+
+    def compute_new_P(self, X, group_id):
+        """
+        Makes a parameter matrix for new data. Most of the work in this function
+        comes from having to figure out which indices of self.U to use in order to add
+        on the random effects, and filling in zeros when there are new random effects
+        that were not present in the fitting of the model.
+
+        Args:
+            X : :obj: `list` of :obj: `list` of :obj: `numpy.ndarray`
+                List of list of 2D arrays, storing the covariates for each parameter
+                and outcome.
+            group_id: :obj: `numpy.ndarray` way of grouping the random effects
+
+        Returns: like
+        """
+        # Preserve the initial ordering that was passed in
+        random_effect_id = group_id.copy()
+        # Sort X by the group ID
+        sort_id = np.argsort(random_effect_id)
+        reverse_sort_id = np.argsort(sort_id)
+        random_effect_id = random_effect_id[sort_id]
+        sorted_X = self.sort_X(X=X, sort_id=sort_id)
+        # Get the present unique groups, and their sizes
+        present_groups, group_sizes = np.unique(random_effect_id, return_counts=True)
+        # Figure out what indices of the groups the model was fit on
+        # apply to the present groups
+        group_indices = np.where(np.in1d(self.unique_group_id, present_groups))[0]
+        # See if there are groups in the new data that were not present in the
+        # groups that the model was fit on
+        existing_random_effects = np.isin(present_groups, self.unique_group_id)
+        # Append zeros to the end of U so that when we index in axis 1 from U,
+        # getting the index = self.num_groups gets the last row
+        zero_random_effects = np.zeros((self.l, 1, self.n))
+        U = np.append(self.U, zero_random_effects, axis=1)
+        # Get the indices of U that we should slice. If existing random effect,
+        # then this will pull the U index from group_indices,
+        # else it is the last one that we filled with zeros (num_groups)
+        indices_u = np.full(existing_random_effects.shape, self.num_groups)
+        indices_u[existing_random_effects] = group_indices
+        indices_u = indices_u.astype(int)
+        # Get U, and use it to create P
+        U = U[:, indices_u, :]
+        P = self.compute_P(X=sorted_X, m=len(random_effect_id), group_sizes=group_sizes, U=U)
+        return P[:, reverse_sort_id, :]
+
+    @staticmethod
+    def mean_outcome(P):
+        raise RuntimeError("This method needs to be over-written with a relevant mean_outcome"
+                           "function for a model. Make sure you are not using this class directly. Subclass it"
+                           "and over-write this method in your subclass.")
+
+    def predict(self, X, group_id=None):
+        """
+        Predict the outcome matrix given a new X matrix and optional group IDs. If the group IDs
+        don't fit the group IDs used to fit the model, then no random effects will be added on.
+        Args:
+            X : :obj: `list` of :obj: `list` of :obj: `numpy.ndarray`
+                List of list of 2D arrays, storing the covariates for each parameter
+                and outcome.
+            group_id: :obj: `numpy.ndarray`, optional
+                Optional integer group id, gives the way of grouping the random
+                effects. When it is not `None`, it should have length `m`.
+        """
+        if group_id is None:
+            # Get the number of rows in the very first X matrix
+            m = X[0][0].shape[0]
+            group_id = np.arange(m)
+
+        # Check the type and dimensions of X and the groups
+        self.check_new_X(X=X, group_id=group_id)
+
+        # Compute a new parameter matrix based on X and the group ids,
+        # and the existing U and beta from self
+        P = self.compute_new_P(X=X, group_id=group_id)
+
+        # Get the new predictions as fitted values for a new parameter matrix P
+        predictions = self.mean_outcome(P=P)
+        return predictions
