@@ -6,6 +6,7 @@
     Core module for correlated count.
 """
 import numpy as np
+from copy import deepcopy
 from ccount import optimization
 import logging
 
@@ -186,10 +187,10 @@ class CorrelatedModel:
         Returns:
             sorted_X: list of list of np.ndarray sorted by sort_id
         """
-        sorted_X = X.copy()
+        sorted_X = deepcopy(X)
         for k in range(self.l):
             for j in range(self.n):
-                X[k][j] = X[k][j][sort_id]
+                sorted_X[k][j] = sorted_X[k][j][sort_id]
         return sorted_X
 
     def compute_P(self, X, m, group_sizes, beta=None, U=None):
@@ -363,13 +364,14 @@ class CorrelatedModel:
         Returns: like
         """
         # Preserve the initial ordering that was passed in
-        initial_ordering = np.arange(len(group_id))
+        random_effect_id = group_id.copy()
         # Sort X by the group ID
-        sort_id = np.argsort(group_id)
-        group_id = group_id[sort_id]
+        sort_id = np.argsort(random_effect_id)
+        reverse_sort_id = np.argsort(sort_id)
+        random_effect_id = random_effect_id[sort_id]
         sorted_X = self.sort_X(X=X, sort_id=sort_id)
         # Get the present unique groups, and their sizes
-        present_groups, group_sizes = np.unique(group_id, return_counts=True)
+        present_groups, group_sizes = np.unique(random_effect_id, return_counts=True)
         # Figure out what indices of the groups the model was fit on
         # apply to the present groups
         group_indices = np.where(np.in1d(self.unique_group_id, present_groups))[0]
@@ -383,13 +385,13 @@ class CorrelatedModel:
         # Get the indices of U that we should slice. If existing random effect,
         # then this will pull the U index from group_indices,
         # else it is the last one that we filled with zeros (num_groups)
-        indices_u = np.full(existing_random_effects, self.num_groups)
+        indices_u = np.full(existing_random_effects.shape, self.num_groups)
         indices_u[existing_random_effects] = group_indices
         indices_u = indices_u.astype(int)
         # Get U, and use it to create P
         U = U[:, indices_u, :]
-        P = self.compute_P(X=sorted_X, m=len(group_id), group_sizes=group_sizes, U=U)
-        return P[:, initial_ordering, :]
+        P = self.compute_P(X=sorted_X, m=len(random_effect_id), group_sizes=group_sizes, U=U)
+        return P[:, reverse_sort_id, :]
 
     @staticmethod
     def mean_outcome(P):
