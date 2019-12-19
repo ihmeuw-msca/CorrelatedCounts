@@ -383,11 +383,9 @@ class CorrelatedModel:
         # Get the indices of U that we should slice. If existing random effect,
         # then this will pull the U index from group_indices,
         # else it is the last one that we filled with zeros (num_groups)
-        indices_u = np.where(
-            condition=existing_random_effects,
-            x=group_indices[np.cumsum(existing_random_effects) - 1],
-            y=self.num_groups
-        )
+        indices_u = np.full(existing_random_effects, self.num_groups)
+        indices_u[existing_random_effects] = group_indices
+        indices_u = indices_u.astype(int)
         # Get U, and use it to create P
         U = U[:, indices_u, :]
         P = self.compute_P(X=sorted_X, m=len(group_id), group_sizes=group_sizes, U=U)
