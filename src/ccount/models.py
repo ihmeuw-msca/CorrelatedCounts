@@ -74,7 +74,7 @@ class NegativeBinomial(CorrelatedModel):
         )
 
     @staticmethod
-    def fitted_values(P):
+    def mean_outcome(P):
         theta = P[0]
         k = P[1]  # The over-dispersion parameter is not used for the mean value calculation
         return theta
