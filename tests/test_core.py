@@ -42,18 +42,21 @@ def test_correlated_model(group_id):
 
 @pytest.mark.parametrize("group_id",
                          [None, np.array([1, 1, 2, 2, 3])])
+@pytest.mark.parametrize("offset",
+                          [np.zeros(5)])
 @pytest.mark.parametrize("beta",
                          [None, [[np.ones(d[k, j])
                                   for j in range(n)] for k in range(l)]])
 @pytest.mark.parametrize("U", [None, 1])
-def test_correlated_model_compute_P(group_id, beta, U):
+def test_correlated_model_compute_P(group_id, beta, U, offset):
     cm = core.CorrelatedModel(m, n, l, d, Y, X,
                               [lambda x: x] * l,
                               lambda y, p: 0.5 * (y - p[0]) ** 2,
                               group_id=group_id)
     if U is not None:
         U = np.ones((cm.m, cm.num_groups, cm.n))
-    P = cm.compute_P(beta=beta, U=U, X=cm.X, m=cm.m, group_sizes=cm.group_sizes)
+    P = cm.compute_P(beta=beta, U=U, X=cm.X, m=cm.m,
+                     group_sizes=cm.group_sizes, offset=offset)
     if beta is None:
         beta = cm.beta
     if U is None:

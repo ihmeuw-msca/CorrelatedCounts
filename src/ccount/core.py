@@ -91,7 +91,7 @@ class CorrelatedModel:
 
         # offset for each parameter
         if offset is None:
-            self.offset = [np.zeros(self.m)] * 3
+            self.offset = [np.zeros(self.m)] * self.l
         else:
             self.offset = [off if off is not None else np.zeros(self.m) for off in offset]
 
@@ -146,7 +146,7 @@ class CorrelatedModel:
         assert self.group_id.dtype == int
         assert isinstance(self.offset, list)
         for offset_k in self.offset:
-            assert isinstance(offset_k, np.array)
+            assert isinstance(offset_k, np.ndarray)
 
         assert isinstance(self.Y, np.ndarray)
         assert self.Y.dtype == np.number
@@ -238,11 +238,12 @@ class CorrelatedModel:
         P = np.array([X[k][j].dot(beta[k][j])
                       for k in range(self.l)
                       for j in range(self.n)])
+        for k in range(self.l):
+            P[k] = P[k] + offset[k]
         P = P.reshape((self.l, self.n, m)).transpose(0, 2, 1)
         U = np.repeat(U, group_sizes, axis=1)
         P = P + U
         for k in range(self.l):
-            P[k] = P[k] + offset[k]
             P[k] = self.g[k](P[k])
         return P
 
