@@ -444,7 +444,7 @@ class CorrelatedModel:
             group_id = np.arange(m)
         # offset for each parameter
         if offset is None:
-            offset = [np.zeros(m)] * 3
+            offset = [np.zeros(m)] * self.l
         else:
             offset = [off if off is not None else np.zeros(m) for off in offset]
 
