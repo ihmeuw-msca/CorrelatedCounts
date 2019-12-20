@@ -48,7 +48,7 @@ class CorrelatedModel:
 
     """
 
-    def __init__(self, m, n, l, d, Y, X, g, f, group_id=None):
+    def __init__(self, m, n, l, d, Y, X, g, f, group_id=None, offset=None):
         """Correlated Model initialization method.
 
         Parameters
@@ -73,6 +73,9 @@ class CorrelatedModel:
         group_id: :obj: `numpy.ndarray`, optional
             Optional integer group id, gives the way of grouping the random
             effects. When it is not `None`, it should have length `m`.
+        offset: `list` of :obj: `np.array`, optional
+            Optional list of offsets to apply for each parameter. Must be of length l
+            and each element must be None or an np.array of length m
         """
         # dimension
         self.m = m
@@ -85,6 +88,12 @@ class CorrelatedModel:
             self.group_id = np.arange(self.m)
         else:
             self.group_id = group_id
+
+        # offset for each parameter
+        if offset is None:
+            self.offset = [np.zeros(self.m)] * 3
+        else:
+            self.offset = [off if off is not None else np.zeros(self.m) for off in offset]
 
         # data and covariates
         self.Y = Y
@@ -100,6 +109,8 @@ class CorrelatedModel:
         # group the data with group_id
         sort_id = np.argsort(self.group_id)
         self.group_id = self.group_id[sort_id]
+        for k in range(self.l):
+            self.offset[k] = self.offset[k][sort_id]
 
         self.Y = self.Y[sort_id]
         self.X = self.sort_X(X=self.X, sort_id=sort_id)
@@ -133,6 +144,9 @@ class CorrelatedModel:
         assert isinstance(self.group_id, np.ndarray)
         assert self.d.dtype == int
         assert self.group_id.dtype == int
+        assert isinstance(self.offset, list)
+        for offset_k in self.offset:
+            assert isinstance(offset_k, np.array)
 
         assert isinstance(self.Y, np.ndarray)
         assert self.Y.dtype == np.number
@@ -154,6 +168,11 @@ class CorrelatedModel:
         assert self.n > 0
         assert self.l > 0
         assert np.all(self.d > 0)
+        for k in self.X:
+            for j in k:
+                assert np.isfinite(j).all()
+        for offset_k in self.offset:
+            assert np.isfinite(offset_k).all()
         LOG.info("...passed.")
 
         # sizes
@@ -167,13 +186,9 @@ class CorrelatedModel:
 
         assert len(self.g) == self.l
         assert self.group_id.shape == (self.m,)
-
-        try:
-            for k in self.X:
-                for j in k:
-                    assert np.isfinite(j).all()
-        except AssertionError:
-            raise ValueError("There are non-finite values for the covariates.")
+        assert len(self.offset) == self.l
+        for offset_k in self.offset:
+            assert offset_k.shape == (self.m,)
 
         LOG.info("...passed.")
 
@@ -193,7 +208,7 @@ class CorrelatedModel:
                 sorted_X[k][j] = sorted_X[k][j][sort_id]
         return sorted_X
 
-    def compute_P(self, X, m, group_sizes, beta=None, U=None):
+    def compute_P(self, X, m, group_sizes, offset, beta=None, U=None):
         """Compute the parameter matrix.
 
         Parameters
@@ -208,6 +223,7 @@ class CorrelatedModel:
         U : :obj: `numpy.ndarray`, optional
             Random effects for predicting the parameters. Assume random effects
             follow multi-normal distribution.
+        offset: `list` of :obj: `numpy.ndarray`
 
         Returns
         -------
@@ -226,6 +242,7 @@ class CorrelatedModel:
         U = np.repeat(U, group_sizes, axis=1)
         P = P + U
         for k in range(self.l):
+            P[k] = P[k] + offset[k]
             P[k] = self.g[k](P[k])
         return P
 
@@ -256,7 +273,9 @@ class CorrelatedModel:
         if P is not None:
             self.P = P
         else:
-            self.P = self.compute_P(X=self.X, m=self.m, group_sizes=self.group_sizes)
+            self.P = self.compute_P(
+                X=self.X, m=self.m, group_sizes=self.group_sizes, offset=self.offset
+            )
 
     def neg_log_likelihood(self, beta=None, U=None, D=None):
         """Return the negative log likelihood of the model.
@@ -283,7 +302,8 @@ class CorrelatedModel:
         if D is None:
             D = self.D
 
-        P = self.compute_P(beta=beta, U=U, m=self.m, X=self.X, group_sizes=self.group_sizes)
+        P = self.compute_P(beta=beta, U=U, m=self.m, X=self.X,
+                           group_sizes=self.group_sizes, offset=self.offset)
         # data likelihood
         val = np.mean(np.sum(self.f(self.Y, P), axis=1))
         # random effects prior
@@ -348,7 +368,7 @@ class CorrelatedModel:
                    for k in range(self.l)
                    for j in range(self.n))
 
-    def compute_new_P(self, X, group_id):
+    def compute_new_P(self, X, group_id, offset):
         """
         Makes a parameter matrix for new data. Most of the work in this function
         comes from having to figure out which indices of self.U to use in order to add
@@ -360,15 +380,17 @@ class CorrelatedModel:
                 List of list of 2D arrays, storing the covariates for each parameter
                 and outcome.
             group_id: :obj: `numpy.ndarray` way of grouping the random effects
+            offset: `list` of :obj: `numpy.ndarray`
 
         Returns: like
         """
-        # Preserve the initial ordering that was passed in
         random_effect_id = group_id.copy()
+        offsets = deepcopy(offset)
         # Sort X by the group ID
         sort_id = np.argsort(random_effect_id)
         reverse_sort_id = np.argsort(sort_id)
         random_effect_id = random_effect_id[sort_id]
+        offsets = offsets[sort_id]
         sorted_X = self.sort_X(X=X, sort_id=sort_id)
         # Get the present unique groups, and their sizes
         present_groups, group_sizes = np.unique(random_effect_id, return_counts=True)
@@ -390,7 +412,10 @@ class CorrelatedModel:
         indices_u = indices_u.astype(int)
         # Get U, and use it to create P
         U = U[:, indices_u, :]
-        P = self.compute_P(X=sorted_X, m=len(random_effect_id), group_sizes=group_sizes, U=U)
+        P = self.compute_P(
+            X=sorted_X, m=len(random_effect_id),
+            group_sizes=group_sizes, U=U, offset=offsets
+        )
         return P[:, reverse_sort_id, :]
 
     @staticmethod
@@ -399,7 +424,7 @@ class CorrelatedModel:
                            "function for a model. Make sure you are not using this class directly. Subclass it"
                            "and over-write this method in your subclass.")
 
-    def predict(self, X, group_id=None):
+    def predict(self, X, group_id=None, offset=None):
         """
         Predict the outcome matrix given a new X matrix and optional group IDs. If the group IDs
         don't fit the group IDs used to fit the model, then no random effects will be added on.
@@ -410,18 +435,24 @@ class CorrelatedModel:
             group_id: :obj: `numpy.ndarray`, optional
                 Optional integer group id, gives the way of grouping the random
                 effects. When it is not `None`, it should have length `m`.
+            offset: `list` of :obj: `numpy.ndarray`, optional
         """
+        m = X[0][0].shape[0]
         if group_id is None:
             # Get the number of rows in the very first X matrix
-            m = X[0][0].shape[0]
             group_id = np.arange(m)
+        # offset for each parameter
+        if offset is None:
+            offset = [np.zeros(m)] * 3
+        else:
+            offset = [off if off is not None else np.zeros(m) for off in offset]
 
         # Check the type and dimensions of X and the groups
         self.check_new_X(X=X, group_id=group_id)
 
         # Compute a new parameter matrix based on X and the group ids,
         # and the existing U and beta from self
-        P = self.compute_new_P(X=X, group_id=group_id)
+        P = self.compute_new_P(X=X, group_id=group_id, offset=offset)
 
         # Get the new predictions as fitted values for a new parameter matrix P
         predictions = self.mean_outcome(P=P)

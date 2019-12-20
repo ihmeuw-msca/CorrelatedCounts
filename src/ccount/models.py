@@ -12,12 +12,12 @@ class HurdlePoisson(CorrelatedModel):
     for the proportion of zeros, and a zero-truncated
     Poisson for the
     """
-    def __init__(self, m, d, Y, X, group_id=None):
+    def __init__(self, m, d, Y, X, group_id=None, offset=None):
         LOG.info("Initializing a Hurdle Poisson Model.")
         assert len(d) == 2
         assert len(X) == 2
         super().__init__(
-            m=m, n=2, d=d, Y=Y.astype(np.number), X=X, group_id=group_id,
+            m=m, n=2, d=d, Y=Y.astype(np.number), X=X, group_id=group_id, offset=offset,
             l=2, g=[lambda x: np.exp(x) / (1 + np.exp(x)), np.exp],
             f=NegLogLikelihoods.hurdle_poisson
         )
@@ -42,12 +42,12 @@ class ZeroInflatedPoisson(CorrelatedModel):
     >>> zp = ZeroInflatedPoisson(m=ps.m, d=D, Y=Y, X=X)
     >>> zp.optimize_params()
     """
-    def __init__(self, m, d, Y, X, group_id=None):
+    def __init__(self, m, d, Y, X, group_id=None, offset=None):
         LOG.info("Initializing a Zero-Inflated Poisson Model")
         assert len(d) == 2
         assert len(X) == 2
         super().__init__(
-            m=m, n=2, d=d, Y=Y.astype(np.number), X=X, group_id=group_id,
+            m=m, n=2, d=d, Y=Y.astype(np.number), X=X, group_id=group_id, offset=offset,
             l=2, g=[lambda x: np.exp(x) / (1 + np.exp(x)), np.exp],
             f=NegLogLikelihoods.zi_poisson
         )
@@ -63,12 +63,12 @@ class NegativeBinomial(CorrelatedModel):
     """
     A Negative Binomial Model.
     """
-    def __init__(self, m, d, Y, X, group_id=None):
+    def __init__(self, m, d, Y, X, group_id=None, offset=None):
         LOG.info("Initializing a negative binomial model.")
         assert len(d) == 2
         assert len(X) == 2
         super().__init__(
-            m=m, n=2, d=d, Y=Y.astype(np.number), X=X, group_id=group_id,
+            m=m, n=2, d=d, Y=Y.astype(np.number), X=X, group_id=group_id, offset=offset,
             l=2, g=[lambda x: np.exp(x) / (1 + np.exp(x)), np.exp],
             f=NegLogLikelihoods.nbinom
         )
