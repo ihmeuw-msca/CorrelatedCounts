@@ -48,7 +48,7 @@ class CorrelatedModel:
 
     """
 
-    def __init__(self, m, n, l, d, Y, X, g, f, group_id=None, offset=None):
+    def __init__(self, m, n, l, d, Y, X, g, f, group_id=None, offset=None, weights=None):
         """Correlated Model initialization method.
 
         Parameters
@@ -76,6 +76,9 @@ class CorrelatedModel:
         offset: `list` of :obj: `np.array`, optional
             Optional list of offsets to apply for each parameter. Must be of length l
             and each element must be None or an np.array of length m
+        weights: :obj: `np.ndarray`, optional
+            Optional list of weights to apply to the log likelihood likelihood
+            Should be of dimension m x n
         """
         # dimension
         self.m = m
@@ -94,6 +97,12 @@ class CorrelatedModel:
             self.offset = [np.zeros(self.m)] * self.l
         else:
             self.offset = [off if off is not None else np.zeros(self.m) for off in offset]
+
+        # weights to put on the negative log likelihood
+        if weights is None:
+            self.W = np.ones((self.m, self.n))
+        else:
+            self.W = weights
 
         # data and covariates
         self.Y = Y
@@ -147,6 +156,7 @@ class CorrelatedModel:
         assert isinstance(self.offset, list)
         for offset_k in self.offset:
             assert isinstance(offset_k, np.ndarray)
+        assert isinstance(self.W, np.ndarray)
 
         assert isinstance(self.Y, np.ndarray)
         assert self.Y.dtype == np.number
@@ -173,6 +183,7 @@ class CorrelatedModel:
                 assert np.isfinite(j).all()
         for offset_k in self.offset:
             assert np.isfinite(offset_k).all()
+        assert (self.W >= 0).all()
         LOG.info("...passed.")
 
         # sizes
@@ -189,6 +200,7 @@ class CorrelatedModel:
         assert len(self.offset) == self.l
         for offset_k in self.offset:
             assert offset_k.shape == (self.m,)
+        assert self.W.shape == (self.m, self.n)
 
         LOG.info("...passed.")
 
@@ -305,8 +317,8 @@ class CorrelatedModel:
 
         P = self.compute_P(beta=beta, U=U, m=self.m, X=self.X,
                            group_sizes=self.group_sizes, offset=self.offset)
-        # data likelihood
-        val = np.mean(np.sum(self.f(self.Y, P), axis=1))
+        # data negative log likelihood
+        val = np.mean(np.sum(self.f(self.Y, P) * self.W, axis=1))
         # random effects prior
         for k in range(self.l):
             val += 0.5*np.mean(np.sum(U[k].dot(np.linalg.pinv(D[k]))*U[k],
