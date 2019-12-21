@@ -1,5 +1,5 @@
 import numpy as np
-from scipy.special import gammaln
+from scipy.special import loggamma
 
 
 class NegLogLikelihoods:
@@ -72,8 +72,8 @@ class NegLogLikelihoods:
         ll = (
             (np.log(p + (1 - p) * (1 + k * theta) ** (-1 / k))) * (Y == 0) +
             (np.log(1 - p) +
-             gammaln(Y + k ** (-1)) -
-             gammaln(k ** (-1)) -
+             loggamma(Y + k ** (-1)) -
+             loggamma(k ** (-1)) -
              k ** (-1) * np.log(1 + k * theta) -
              Y * np.log(1 + (theta * k) ** (-1))) * (Y > 0)
         )
@@ -87,16 +87,15 @@ class NegLogLikelihoods:
         Args:
             Y: observed data
             P: list with the following elements:
-                0: the probability of a structural zero
-                1: mean of the Poisson distribution
-                2: over-dispersion parameter for negative binomial
+                0: mean of the Poisson (also negative binomial) distribution
+                1: over-dispersion parameter for negative binomial
         """
-        assert P.shape[1] == 2
-        theta = P[1]
-        k = P[2]
+        assert P.shape[0] == 2
+        theta = P[0]
+        k = P[1]
         ll = (
-            gammaln(Y + k ** (-1)) -
-            gammaln(k ** (-1)) -
+            loggamma(Y + k ** (-1)) -
+            loggamma(k ** (-1)) -
             k ** (-1) * np.log(1 + k * theta) -
             Y * np.log(1 + (theta * k) ** (-1))
         )
