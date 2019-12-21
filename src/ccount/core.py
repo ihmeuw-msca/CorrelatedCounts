@@ -391,7 +391,8 @@ class CorrelatedModel:
         sort_id = np.argsort(random_effect_id)
         reverse_sort_id = np.argsort(sort_id)
         random_effect_id = random_effect_id[sort_id]
-        offsets = offsets[sort_id]
+        for k in range(len(offsets)):
+            offsets[k] = offsets[k][sort_id]
         sorted_X = self.sort_X(X=X, sort_id=sort_id)
         # Get the present unique groups, and their sizes
         present_groups, group_sizes = np.unique(random_effect_id, return_counts=True)
