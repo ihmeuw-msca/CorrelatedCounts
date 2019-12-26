@@ -20,16 +20,20 @@ class OptimizationInterface:
         * optimize over random effect U,
         * compute the empirical covariance matrix for U.
     """
-    def __init__(self, cm):
+    def __init__(self, cm, n_iteration_print=10):
         """Optimization interface initialization method.
 
         Parameters
         ----------
         cm : ccount.core.CorrelatedModel
             Correlated model interface.
+        n_iteration_print : int
+            Will print the objective function value every n_iteration_print iters
 
         """
         self.cm = cm
+        self.EVALUATIONS = 0
+        self.n_iteration_print = n_iteration_print
 
     def objective_beta(self, vec):
         """Objective function for fitting the fixed effects.
@@ -113,24 +117,26 @@ class OptimizationInterface:
         """Optimize fixed effects.
         """
         LOG.info("Optimizing beta.")
-        print('{0:4s}    {1:9s}'.format('Iteration', 'Rosenbrock Function Value'))
+        self.EVALUATIONS = 1
+        print('{0:4s}    {1:9s}'.format('Iteration', 'Objective Function Value'))
         result = sopt.minimize(self.objective_beta,
                                utils.beta_to_vec(self.cm.beta),
                                jac=self.gradient_beta,
                                method="L-BFGS-B",
-                               callback=utils.callback)
+                               callback=self.callback_beta)
         self.cm.update_params(beta=utils.vec_to_beta(result.x, self.cm.d))
 
     def optimize_U(self):
         """Optimize random effects.
         """
         LOG.info("Optimizing U.")
-        print('{0:4s}    {1:9s}'.format('Iteration', 'Rosenbrock Function Value'))
+        self.EVALUATIONS = 1
+        print('{0:4s}    {1:9s}'.format('Iteration', 'Objective Function Value'))
         result = sopt.minimize(self.objective_U,
                                self.cm.U.flatten(),
                                jac=self.gradient_U,
                                method="L-BFGS-B",
-                               callback=utils.callback)
+                               callback=self.callback_U)
         self.cm.update_params(U=result.x.reshape(self.cm.U.shape))
 
     def compute_D(self):
@@ -139,3 +145,17 @@ class OptimizationInterface:
         LOG.info("Computing D.")
         D = np.array([np.cov(self.cm.U[k].T) for k in range(self.cm.l)])
         self.cm.update_params(D=D)
+
+    def callback_beta(self, X):
+        if self.EVALUATIONS % 10 == 0:
+            print('{0:4d}        {1: 3.6f}'.format(
+                self.EVALUATIONS, self.objective_beta(X))
+            )
+        self.EVALUATIONS += 1
+
+    def callback_U(self, X):
+        if self.EVALUATIONS % 10 == 0:
+            print('{0:4d}        {1: 3.6f}'.format(
+                self.EVALUATIONS, self.objective_U(X))
+            )
+        self.EVALUATIONS += 1

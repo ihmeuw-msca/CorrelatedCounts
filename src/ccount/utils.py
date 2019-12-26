@@ -6,18 +6,6 @@
     Utility functions.
 """
 import numpy as np
-from scipy.optimize import rosen
-
-EVALUATIONS = 1
-
-
-def callback(X):
-    global EVALUATIONS
-    if EVALUATIONS % 10 == 0:
-        print('{0:4d}        {1: 3.6f}'.format(
-            EVALUATIONS, rosen(X))
-        )
-    EVALUATIONS += 1
 
 
 def vec_to_beta(vec, d):
