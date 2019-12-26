@@ -61,7 +61,6 @@ class OptimizationInterface:
         numpy.ndarray
             Gradient at current fixed effects.
         """
-        LOG.debug("Computing the gradient for beta.")
         g_vec = np.zeros(vec.size)
         c_vec = vec + 0j
         for i in range(vec.size):
@@ -101,7 +100,6 @@ class OptimizationInterface:
         numpy.ndarray
             Gradient at current random effects.
         """
-        LOG.debug("Computing the gradient for U.")
         g_vec = np.zeros(vec.size)
         c_vec = vec + 0j
         for i in range(vec.size):
@@ -115,25 +113,29 @@ class OptimizationInterface:
         """Optimize fixed effects.
         """
         LOG.info("Optimizing beta.")
+        print('{0:4s}    {1:9s}'.format('Iteration', 'Rosenbrock Function Value'))
         result = sopt.minimize(self.objective_beta,
                                utils.beta_to_vec(self.cm.beta),
                                jac=self.gradient_beta,
-                               method="L-BFGS-B")
+                               method="L-BFGS-B",
+                               callback=utils.callback)
         self.cm.update_params(beta=utils.vec_to_beta(result.x, self.cm.d))
 
     def optimize_U(self):
         """Optimize random effects.
         """
         LOG.info("Optimizing U.")
+        print('{0:4s}    {1:9s}'.format('Iteration', 'Rosenbrock Function Value'))
         result = sopt.minimize(self.objective_U,
                                self.cm.U.flatten(),
                                jac=self.gradient_U,
-                               method="L-BFGS-B")
+                               method="L-BFGS-B",
+                               callback=utils.callback)
         self.cm.update_params(U=result.x.reshape(self.cm.U.shape))
 
     def compute_D(self):
-        LOG.info("Computing D.")
         """Compute the sample covariance of the random effects.
         """
+        LOG.info("Computing D.")
         D = np.array([np.cov(self.cm.U[k].T) for k in range(self.cm.l)])
         self.cm.update_params(D=D)

@@ -80,6 +80,9 @@ class CorrelatedModel:
             Optional list of weights to apply to the log likelihood likelihood
             Should be of dimension m x n
         """
+        self.model_type = None
+        self.parameters = None
+
         # dimension
         self.m = m
         self.n = n
@@ -471,3 +474,43 @@ class CorrelatedModel:
         # Get the new predictions as fitted values for a new parameter matrix P
         predictions = self.mean_outcome(P=P)
         return predictions
+
+    def summarize(self):
+        """
+        Output summaries of the model results.
+
+        Returns: (str)
+        """
+        print(f"MODEL SUMMARY FOR {self.model_type.upper()}")
+        print("------------------------------------------")
+        print("------------------------------------------")
+        print(f"NUM OBSERVATIONS: {self.m}")
+        print(f"NUM PARAMETERS: {self.n}")
+        print(f"NUM OUTCOMES: {self.l}")
+        print("------------------------------------------")
+        print("FIXED EFFECTS")
+        print("------------------------------------------")
+        print("UNTRANSFORMED")
+        for i in range(self.l):
+            print(f"\n{self.parameters[i].upper()}")
+            for j in range(self.n):
+                print(f"outcome {j}: {self.beta[i][j]}")
+        print("\nTRANSFORMED")
+        for i in range(self.l):
+            print(f"\n{self.parameters[i].upper()}")
+            for j in range(self.n):
+                print(f"outcome {j}: {self.g[i](self.beta[i][j])}")
+        print("------------------------------------------")
+        print("RANDOM EFFECTS")
+        print("------------------------------------------")
+        print("RANDOM EFFECTS VARIANCE-COVARIANCE MATRIX")
+        for i in range(self.l):
+            print(f"\n{self.parameters[i].upper()}")
+            print(f"outcome {i}: \n {self.D[i]}")
+        print("------------------------------------------")
+        print("RANDOM EFFECTS BY GROUP")
+        for i in range(self.l):
+            print(f"\n{self.parameters[i].upper()}")
+            for j in range(self.num_groups):
+                print(f"group id {j}: {self.U[i][j]}")
+
