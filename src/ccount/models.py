@@ -21,6 +21,10 @@ class HurdlePoisson(CorrelatedModel):
             l=2, g=[lambda x: np.exp(x) / (1 + np.exp(x)), np.exp],
             f=NegLogLikelihoods.hurdle_poisson
         )
+        self.model_type = "Hurdle Poisson"
+        self.parameters = [
+            "Probability of Zero", "Mean of Poisson"
+        ]
 
     @staticmethod
     def mean_outcome(P):
@@ -52,6 +56,10 @@ class ZeroInflatedPoisson(CorrelatedModel):
             l=2, g=[lambda x: np.exp(x) / (1 + np.exp(x)), np.exp],
             f=NegLogLikelihoods.zi_poisson
         )
+        self.model_type = "Zero-Inflated Poisson"
+        self.parameters = [
+            "Probability of Structural Zero", "Mean of Poisson"
+        ]
 
     @staticmethod
     def mean_outcome(P):
@@ -70,9 +78,13 @@ class NegativeBinomial(CorrelatedModel):
         assert len(X) == 2
         super().__init__(
             m=m, n=2, d=d, Y=Y.astype(np.number), X=X, group_id=group_id, offset=offset,
-            l=2, g=[lambda x: np.exp(x) / (1 + np.exp(x)), np.exp],
+            l=2, g=[np.exp, np.exp],
             f=NegLogLikelihoods.nbinom
         )
+        self.model_type = "Negative Binomial"
+        self.parameters = [
+            "Mean of Poisson", "Over-Dispersion Parameter Variance"
+        ]
 
     @staticmethod
     def mean_outcome(P):
