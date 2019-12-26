@@ -1,6 +1,8 @@
 import numpy as np
 from scipy.special import loggamma
 
+import warnings
+
 
 class NegLogLikelihoods:
 
@@ -84,6 +86,10 @@ class NegLogLikelihoods:
         """
         Negative Binomial likelihood.
 
+        The over-dispersion parameter P[1] follows a
+        gamma(1/k, 1/k) distribution, so Var = P[1]
+        Mean = 1. And a larger Var means more over-dispersion.
+
         Args:
             Y: observed data
             P: list with the following elements:
@@ -92,11 +98,12 @@ class NegLogLikelihoods:
         """
         assert P.shape[0] == 2
         theta = P[0]
-        k = P[1]
+        k = P[1] ** -1
+
         ll = (
-            loggamma(Y + k ** (-1)) -
-            loggamma(k ** (-1)) -
-            k ** (-1) * np.log(1 + k * theta) -
-            Y * np.log(1 + (theta * k) ** (-1))
+            loggamma(Y + k) - loggamma(k) +
+            k * np.log(k) - k * np.log(k + theta) +
+            Y * np.log(theta) - Y * np.log(theta + k)
         )
+
         return -ll
