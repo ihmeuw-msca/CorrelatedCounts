@@ -97,9 +97,9 @@ class CorrelatedModel:
 
         # offset for each parameter
         if offset is None:
-            self.offset = [np.zeros(self.m)] * self.l
+            self.offset = [np.ones((self.m, 1))] * self.l
         else:
-            self.offset = [off if off is not None else np.zeros(self.m) for off in offset]
+            self.offset = [off if off is not None else np.ones(self.m) for off in offset]
 
         # weights to put on the negative log likelihood
         if weights is None:
@@ -202,7 +202,7 @@ class CorrelatedModel:
         assert self.group_id.shape == (self.m,)
         assert len(self.offset) == self.l
         for offset_k in self.offset:
-            assert offset_k.shape == (self.m,)
+            assert offset_k.shape == (self.m, 1)
         assert self.W.shape == (self.m, self.n)
 
         LOG.info("...passed.")
@@ -253,13 +253,13 @@ class CorrelatedModel:
         P = np.array([X[k][j].dot(beta[k][j])
                       for k in range(self.l)
                       for j in range(self.n)])
-        for k in range(self.l):
-            P[k] = P[k] + offset[k]
         P = P.reshape((self.l, self.n, m)).transpose(0, 2, 1)
         U = np.repeat(U, group_sizes, axis=1)
         P = P + U
         for k in range(self.l):
             P[k] = self.g[k](P[k])
+        for k in range(self.l):
+            P[k] = P[k] * offset[k]
         return P
 
     def update_params(self, beta=None, U=None, D=None, P=None):

@@ -1,7 +1,9 @@
 import numpy as np
+import logging
+
 from ccount.core import CorrelatedModel
 from ccount.likelihoods import NegLogLikelihoods
-import logging
+from ccount.link_functions import smooth_ReLU, expit
 
 LOG = logging.getLogger(__name__)
 
@@ -12,13 +14,13 @@ class HurdlePoisson(CorrelatedModel):
     for the proportion of zeros, and a zero-truncated
     Poisson for the
     """
-    def __init__(self, m, d, Y, X, group_id=None, offset=None):
+    def __init__(self, m, n, d, Y, X, group_id=None, offset=None):
         LOG.info("Initializing a Hurdle Poisson Model.")
         assert len(d) == 2
         assert len(X) == 2
         super().__init__(
-            m=m, n=2, d=d, Y=Y.astype(np.number), X=X, group_id=group_id, offset=offset,
-            l=2, g=[lambda x: np.exp(x) / (1 + np.exp(x)), np.exp],
+            m=m, n=n, d=d, Y=Y.astype(np.number), X=X, group_id=group_id, offset=offset,
+            l=2, g=[expit, np.exp],
             f=NegLogLikelihoods.hurdle_poisson
         )
         self.model_type = "Hurdle Poisson"
@@ -46,14 +48,14 @@ class ZeroInflatedPoisson(CorrelatedModel):
     >>> zp = ZeroInflatedPoisson(m=ps.m, d=D, Y=Y, X=X)
     >>> zp.optimize_params()
     """
-    def __init__(self, m, d, Y, X, group_id=None, offset=None, weights=None):
+    def __init__(self, m, n, d, Y, X, group_id=None, offset=None, weights=None):
         LOG.info("Initializing a Zero-Inflated Poisson Model")
         assert len(d) == 2
         assert len(X) == 2
         super().__init__(
-            m=m, n=2, d=d, Y=Y.astype(np.number), X=X,
+            m=m, n=n, d=d, Y=Y.astype(np.number), X=X,
             group_id=group_id, offset=offset, weights=weights,
-            l=2, g=[lambda x: np.exp(x) / (1 + np.exp(x)), np.exp],
+            l=2, g=[expit, np.exp],
             f=NegLogLikelihoods.zi_poisson
         )
         self.model_type = "Zero-Inflated Poisson"
@@ -68,16 +70,37 @@ class ZeroInflatedPoisson(CorrelatedModel):
         return (1 - p) * theta
 
 
+class ZeroInflatedPoissonSmoothReLU(CorrelatedModel):
+    """
+    A Zero-Inflated Poisson likelihood with a Smooth ReLU link function
+    rather than a log link for the Poisson mean.
+    """
+    def __init__(self, m, n, d, Y, X, group_id=None, offset=None, weights=None):
+        LOG.info("Initializing a Zero-Inflated Poisson SmoothReLU Model")
+        assert len(d) == 2
+        assert len(X) == 2
+        super().__init__(
+            m=m, n=n, d=d, Y=Y.astype(np.number), X=X,
+            group_id=group_id, offset=offset, weights=weights,
+            l=2, g=[expit, smooth_ReLU],
+            f=NegLogLikelihoods.zi_poisson
+        )
+        self.model_type = "Zero-Inflated Poisson Smooth ReLU"
+        self.parameters = [
+            "Probability of Structural Zero", "Mean of Poisson"
+        ]
+
+
 class NegativeBinomial(CorrelatedModel):
     """
     A Negative Binomial Model.
     """
-    def __init__(self, m, d, Y, X, group_id=None, offset=None):
+    def __init__(self, m, n, d, Y, X, group_id=None, offset=None):
         LOG.info("Initializing a negative binomial model.")
         assert len(d) == 2
         assert len(X) == 2
         super().__init__(
-            m=m, n=2, d=d, Y=Y.astype(np.number), X=X, group_id=group_id, offset=offset,
+            m=m, n=n, d=d, Y=Y.astype(np.number), X=X, group_id=group_id, offset=offset,
             l=2, g=[np.exp, np.exp],
             f=NegLogLikelihoods.nbinom
         )
