@@ -97,9 +97,9 @@ class CorrelatedModel:
 
         # offset for each parameter
         if offset is None:
-            self.offset = [np.zeros(self.m)] * self.l
+            self.offset = [np.ones((self.m, 1))] * self.l
         else:
-            self.offset = [off if off is not None else np.zeros(self.m) for off in offset]
+            self.offset = [off if off is not None else np.ones(self.m) for off in offset]
 
         # weights to put on the negative log likelihood
         if weights is None:
@@ -202,7 +202,7 @@ class CorrelatedModel:
         assert self.group_id.shape == (self.m,)
         assert len(self.offset) == self.l
         for offset_k in self.offset:
-            assert offset_k.shape == (self.m,)
+            assert offset_k.shape == (self.m, 1)
         assert self.W.shape == (self.m, self.n)
 
         LOG.info("...passed.")
