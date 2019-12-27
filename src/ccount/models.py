@@ -3,7 +3,7 @@ import logging
 
 from ccount.core import CorrelatedModel
 from ccount.likelihoods import NegLogLikelihoods
-from ccount.utils import smooth_ReLU
+from ccount.link_functions import smooth_ReLU, expit
 
 LOG = logging.getLogger(__name__)
 
@@ -20,7 +20,7 @@ class HurdlePoisson(CorrelatedModel):
         assert len(X) == 2
         super().__init__(
             m=m, n=n, d=d, Y=Y.astype(np.number), X=X, group_id=group_id, offset=offset,
-            l=2, g=[lambda x: np.exp(x) / (1 + np.exp(x)), np.exp],
+            l=2, g=[expit, np.exp],
             f=NegLogLikelihoods.hurdle_poisson
         )
         self.model_type = "Hurdle Poisson"
@@ -55,7 +55,7 @@ class ZeroInflatedPoisson(CorrelatedModel):
         super().__init__(
             m=m, n=n, d=d, Y=Y.astype(np.number), X=X,
             group_id=group_id, offset=offset, weights=weights,
-            l=2, g=[lambda x: np.exp(x) / (1 + np.exp(x)), np.exp],
+            l=2, g=[expit, np.exp],
             f=NegLogLikelihoods.zi_poisson
         )
         self.model_type = "Zero-Inflated Poisson"
@@ -82,12 +82,12 @@ class ZeroInflatedPoissonSmoothReLU(CorrelatedModel):
         super().__init__(
             m=m, n=n, d=d, Y=Y.astype(np.number), X=X,
             group_id=group_id, offset=offset,
-            l=2, g=[np.exp, smooth_ReLU],
+            l=2, g=[expit, smooth_ReLU],
             f=NegLogLikelihoods.zi_poisson
         )
         self.model_type = "Zero-Inflated Poisson Smooth ReLU"
         self.parameters = [
-            "Mean of Poisson", "Over-Dispersion Parameter Variance"
+            "Probability of Structural Zero", "Mean of Poisson"
         ]
 
 

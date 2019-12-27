@@ -8,11 +8,6 @@
 import numpy as np
 
 
-def smooth_ReLU(x, x_limit=50):
-    above_limit = x > x_limit
-    return above_limit * x + ~above_limit * np.log(1 + np.exp(x))
-
-
 def vec_to_beta(vec, d):
     """Convert vector into correlated model beta structure.
 
