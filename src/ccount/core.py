@@ -253,13 +253,13 @@ class CorrelatedModel:
         P = np.array([X[k][j].dot(beta[k][j])
                       for k in range(self.l)
                       for j in range(self.n)])
-        for k in range(self.l):
-            P[k] = P[k] + offset[k]
         P = P.reshape((self.l, self.n, m)).transpose(0, 2, 1)
         U = np.repeat(U, group_sizes, axis=1)
         P = P + U
         for k in range(self.l):
             P[k] = self.g[k](P[k])
+        for k in range(self.l):
+            P[k] = P[k] * offset[k]
         return P
 
     def update_params(self, beta=None, U=None, D=None, P=None):
