@@ -75,13 +75,13 @@ class ZeroInflatedPoissonSmoothReLU(CorrelatedModel):
     A Zero-Inflated Poisson likelihood with a Smooth ReLU link function
     rather than a log link for the Poisson mean.
     """
-    def __init__(self, m, n, d, Y, X, group_id=None, offset=None):
+    def __init__(self, m, n, d, Y, X, group_id=None, offset=None, weights=None):
         LOG.info("Initializing a Zero-Inflated Poisson SmoothReLU Model")
         assert len(d) == 2
         assert len(X) == 2
         super().__init__(
             m=m, n=n, d=d, Y=Y.astype(np.number), X=X,
-            group_id=group_id, offset=offset,
+            group_id=group_id, offset=offset, weights=weights,
             l=2, g=[expit, smooth_ReLU],
             f=NegLogLikelihoods.zi_poisson
         )
