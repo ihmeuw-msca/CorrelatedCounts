@@ -43,7 +43,7 @@ def test_correlated_model(group_id):
 @pytest.mark.parametrize("group_id",
                          [None, np.array([1, 1, 2, 2, 3])])
 @pytest.mark.parametrize("offset",
-                          [np.zeros(5)])
+                          [np.ones((5, 1))])
 @pytest.mark.parametrize("beta",
                          [None, [[np.ones(d[k, j])
                                   for j in range(n)] for k in range(l)]])
