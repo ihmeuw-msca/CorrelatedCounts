@@ -99,7 +99,7 @@ class CorrelatedModel:
         if offset is None:
             self.offset = [np.ones((self.m, 1))] * self.l
         else:
-            self.offset = [off if off is not None else np.ones(self.m) for off in offset]
+            self.offset = [off if off is not None else np.ones((self.m, 1)) for off in offset]
 
         # weights to put on the negative log likelihood
         if weights is None:
