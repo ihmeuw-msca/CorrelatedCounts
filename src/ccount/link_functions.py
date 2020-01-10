@@ -7,4 +7,6 @@ def expit(x):
 
 def smooth_ReLU(x, x_limit=50):
     above_limit = x > x_limit
-    return above_limit * x + ~above_limit * np.log(1 + np.exp(x))
+    result = np.log(1 + np.exp(x))
+    result[above_limit] = x[above_limit]
+    return result
