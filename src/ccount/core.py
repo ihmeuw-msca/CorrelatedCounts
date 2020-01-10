@@ -48,7 +48,8 @@ class CorrelatedModel:
 
     """
 
-    def __init__(self, m, n, l, d, Y, X, g, f, group_id=None, offset=None, weights=None):
+    def __init__(self, m, n, l, d, Y, X, g, f,
+                 group_id=None, offset=None, weights=None, add_intercepts=False, normalize_X=True):
         """Correlated Model initialization method.
 
         Parameters
@@ -65,7 +66,7 @@ class CorrelatedModel:
             Observations.
         X : :obj: `list` of :obj: `list` of :obj: `numpy.ndarray`
             List of list of 2D arrays, storing the covariates for each parameter
-            and outcome.
+            and outcome. (no intercept -- intercept automatically added)
         g : :obj: `list` of :obj: `function`
             List of link functions for each parameter.
         f : function
@@ -79,9 +80,17 @@ class CorrelatedModel:
         weights: :obj: `np.ndarray`, optional
             Optional list of weights to apply to the log likelihood likelihood
             Should be of dimension m x n
+        normalize_X: bool
+            Whether or not to normalize the covariates
         """
         self.model_type = None
         self.parameters = None
+
+        # check to make sure that if we aren't adding intercepts
+        # there are covariates on each of the parameter / outcomes
+        if any([outcome is None for parameter in X for outcome in parameter]) and not add_intercepts:
+            raise RuntimeError("Cannot fit a model without an intercept and no covariates!"
+                               "Use add_intercept = True.")
 
         # dimension
         self.m = m
@@ -107,9 +116,30 @@ class CorrelatedModel:
         else:
             self.W = weights
 
-        # data and covariates
+        # data
         self.Y = Y
-        self.X = X
+
+        # add on an intercept for each parameter
+        # and set the index of the first covariate
+        # to be either after the intercept or the first covariate
+        self.add_intercepts = add_intercepts
+        if self.add_intercepts:
+            X = self.intercept_X(X=X, m=self.m)
+            self.d += 1
+        self.ci = bool(self.add_intercepts)
+
+        # center and scale the covariates, but keep the mean and std for use later on
+        # if we're not normalizing the covariates, just make the mean 0 and std 1 to avoid
+        # if-else computation later.
+        if normalize_X:
+            self.X_mean = [[k.mean(axis=0) for k in j] for j in X]
+            self.X_std = [[k.std(axis=0) for k in j] for j in X]
+        else:
+            self.X_mean = [[np.zeros(k.shape[1]) for k in j] for j in X]
+            self.X_std = [[np.ones(k.shape[1]) for k in j] for j in X]
+
+        # normalize
+        self.X = self.normalize_X(X=X)
 
         # link and log likelihood functions
         self.g = g
@@ -118,7 +148,7 @@ class CorrelatedModel:
         # check input
         self.check()
 
-        # group the data with group_id
+        # group the data, including offset, with group_id
         sort_id = np.argsort(self.group_id)
         self.group_id = self.group_id[sort_id]
         for k in range(self.l):
@@ -222,6 +252,46 @@ class CorrelatedModel:
             for j in range(self.n):
                 sorted_X[k][j] = sorted_X[k][j][sort_id]
         return sorted_X
+
+    def intercept_X(self, X, m):
+        """
+        Adds on an intercept to the covariates matrices passed in.
+
+        Args:
+            X: list of list of np.ndarray or None
+            m: number of observations
+
+        Returns:
+            new_X: list of list of np.ndarray, with an intercept
+        """
+        new_X = deepcopy(X)
+        intercept = np.ones((m, 1))
+        for i in range(self.l):
+            for j in range(self.n):
+                if new_X[i][j] is None:
+                    new_X[i][j] = intercept.copy()
+                else:
+                    new_X[i][j] = np.concatenate((intercept, X[i][j]), axis=1)
+        return new_X
+
+    def normalize_X(self, X):
+        """
+        Subtracts the mean and divides by the standard deviation
+        that are saved in self.X_mean and self.X_std for the covariates.
+        Assumes that X has an intercept and that we're not going to normalize that!
+
+        Args:
+            X: list of list of np.ndarray
+
+        Returns:
+            X_list: list of list of np.ndarray, normalized by self.X_mean and self.X_std
+        """
+        X_list = deepcopy(X)
+        for i in range(self.l):
+            for j in range(self.n):
+                X_list[i][j][:, self.ci:] = ((X_list[i][j][:, self.ci:] - self.X_mean[i][j][self.ci:]) /
+                                       self.X_std[i][j][self.ci:])
+        return X_list
 
     def compute_P(self, X, m, group_sizes, offset, beta=None, U=None):
         """Compute the parameter matrix.
@@ -441,20 +511,25 @@ class CorrelatedModel:
                            "function for a model. Make sure you are not using this class directly. Subclass it"
                            "and over-write this method in your subclass.")
 
-    def predict(self, X, group_id=None, offset=None):
+    def predict(self, X, m, group_id=None, offset=None):
         """
         Predict the outcome matrix given a new X matrix and optional group IDs. If the group IDs
         don't fit the group IDs used to fit the model, then no random effects will be added on.
         Args:
             X : :obj: `list` of :obj: `list` of :obj: `numpy.ndarray`
                 List of list of 2D arrays, storing the covariates for each parameter
-                and outcome.
+                and outcome (or None instead of array if no covariates)
+            m: int
+                Number of observations
             group_id: :obj: `numpy.ndarray`, optional
                 Optional integer group id, gives the way of grouping the random
                 effects. When it is not `None`, it should have length `m`.
             offset: `list` of :obj: `numpy.ndarray`, optional
         """
-        m = X[0][0].shape[0]
+        if self.add_intercepts:
+            LOG.info("Adding an intercept because it was added in the original model."
+                     "If this is incorrect, please take away the existing intercept, or fit a new model.")
+        normal_X_with_intercept = self.normalize_X(X=self.intercept_X(X=X, m=m))
         if group_id is None:
             # Get the number of rows in the very first X matrix
             group_id = np.arange(m)
@@ -465,11 +540,11 @@ class CorrelatedModel:
             offset = [off if off is not None else np.zeros(m) for off in offset]
 
         # Check the type and dimensions of X and the groups
-        self.check_new_X(X=X, group_id=group_id)
+        self.check_new_X(X=normal_X_with_intercept, group_id=group_id)
 
         # Compute a new parameter matrix based on X and the group ids,
         # and the existing U and beta from self
-        P = self.compute_new_P(X=X, group_id=group_id, offset=offset)
+        P = self.compute_new_P(X=normal_X_with_intercept, group_id=group_id, offset=offset)
 
         # Get the new predictions as fitted values for a new parameter matrix P
         predictions = self.mean_outcome(P=P)
@@ -494,12 +569,18 @@ class CorrelatedModel:
         for i in range(self.l):
             print(f"\n{self.parameters[i].upper()}")
             for j in range(self.n):
-                print(f"outcome {j}: {self.beta[i][j]}")
+                print(f"OUTCOME {j}")
+                if self.add_intercepts:
+                    print(f"value for observations with average covariate values: {self.beta[i][j][0]}")
+                print(f"estimated coefficients: {self.beta[i][j][self.ci:] / self.X_std[i][j][self.ci:]}")
         print("\nTRANSFORMED")
         for i in range(self.l):
             print(f"\n{self.parameters[i].upper()}")
             for j in range(self.n):
-                print(f"outcome {j}: {self.g[i](self.beta[i][j])}")
+                print(f"OUTCOME {j}")
+                if self.add_intercepts:
+                    print(f"value for observations with average covariate values: {self.g[i](self.beta[i][j][0])}")
+                print(f"estimated coefficients: {self.g[i](self.beta[i][j][self.ci:] / self.X_std[i][j][self.ci:])}")
         print("------------------------------------------")
         print("RANDOM EFFECTS")
         print("------------------------------------------")

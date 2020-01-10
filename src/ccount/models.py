@@ -48,14 +48,14 @@ class ZeroInflatedPoisson(CorrelatedModel):
     >>> zp = ZeroInflatedPoisson(m=ps.m, d=D, Y=Y, X=X)
     >>> zp.optimize_params()
     """
-    def __init__(self, m, n, d, Y, X, group_id=None, offset=None, weights=None):
+    def __init__(self, m, n, d, Y, X, group_id=None, offset=None, weights=None, normalize_X=False):
         LOG.info("Initializing a Zero-Inflated Poisson Model")
         assert len(d) == 2
         assert len(X) == 2
         super().__init__(
             m=m, n=n, d=d, Y=Y.astype(np.number), X=X,
-            group_id=group_id, offset=offset, weights=weights,
-            l=2, g=[expit, np.exp],
+            group_id=group_id, offset=offset, weights=weights, normalize_X=normalize_X,
+            l=2, g=[lambda x: np.exp(x) / (1 + np.exp(x)), np.exp],
             f=NegLogLikelihoods.zi_poisson
         )
         self.model_type = "Zero-Inflated Poisson"
