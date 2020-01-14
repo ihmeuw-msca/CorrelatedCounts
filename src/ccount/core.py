@@ -550,48 +550,56 @@ class CorrelatedModel:
         predictions = self.mean_outcome(P=P)
         return predictions
 
-    def summarize(self):
+    def summarize(self, file=None):
         """
         Output summaries of the model results.
 
         Returns: (str)
         """
-        print(f"MODEL SUMMARY FOR {self.model_type.upper()}")
-        print("------------------------------------------")
-        print("------------------------------------------")
-        print(f"NUM OBSERVATIONS: {self.m}")
-        print(f"NUM PARAMETERS: {self.n}")
-        print(f"NUM OUTCOMES: {self.l}")
-        print("------------------------------------------")
-        print("FIXED EFFECTS")
-        print("------------------------------------------")
-        print("UNTRANSFORMED")
+        message = list()
+        message.append(f"MODEL SUMMARY FOR {self.model_type.upper()}")
+        message.append("------------------------------------------")
+        message.append("------------------------------------------")
+        message.append(f"NUM OBSERVATIONS: {self.m}")
+        message.append(f"NUM PARAMETERS: {self.n}")
+        message.append(f"NUM OUTCOMES: {self.l}")
+        message.append("------------------------------------------")
+        message.append("FIXED EFFECTS")
+        message.append("------------------------------------------")
+        message.append("UNTRANSFORMED")
         for i in range(self.l):
-            print(f"\n{self.parameters[i].upper()}")
+            message.append(f"\n{self.parameters[i].upper()}")
             for j in range(self.n):
-                print(f"OUTCOME {j}")
+                message.append(f"OUTCOME {j}")
                 if self.add_intercepts:
-                    print(f"value for observations with average covariate values: {self.beta[i][j][0]}")
-                print(f"estimated coefficients: {self.beta[i][j][self.ci:] / self.X_std[i][j][self.ci:]}")
-        print("\nTRANSFORMED")
+                    message.append(f"value for observations with average covariate values: {self.beta[i][j][0]}")
+                message.append(f"estimated coefficients: {self.beta[i][j][self.ci:] / self.X_std[i][j][self.ci:]}")
+        message.append("\nTRANSFORMED")
         for i in range(self.l):
-            print(f"\n{self.parameters[i].upper()}")
+            message.append(f"\n{self.parameters[i].upper()}")
             for j in range(self.n):
-                print(f"OUTCOME {j}")
+                message.append(f"OUTCOME {j}")
                 if self.add_intercepts:
-                    print(f"value for observations with average covariate values: {self.g[i](self.beta[i][j][0])}")
-                print(f"estimated coefficients: {self.g[i](self.beta[i][j][self.ci:] / self.X_std[i][j][self.ci:])}")
-        print("------------------------------------------")
-        print("RANDOM EFFECTS")
-        print("------------------------------------------")
-        print("RANDOM EFFECTS VARIANCE-COVARIANCE MATRIX")
+                    message.append(f"value for observations with average covariate values: {self.g[i](self.beta[i][j][0])}")
+                message.append(f"estimated coefficients: {self.g[i](self.beta[i][j][self.ci:] / self.X_std[i][j][self.ci:])}")
+        message.append("------------------------------------------")
+        message.append("RANDOM EFFECTS")
+        message.append("------------------------------------------")
+        message.append("RANDOM EFFECTS VARIANCE-COVARIANCE MATRIX")
         for i in range(self.l):
-            print(f"\n{self.parameters[i].upper()}")
-            print(f"outcome {i}: \n {self.D[i]}")
-        print("------------------------------------------")
-        print("RANDOM EFFECTS BY GROUP")
+            message.append(f"\n{self.parameters[i].upper()}")
+            message.append(f"outcome {i}: \n {self.D[i]}")
+        message.append("------------------------------------------")
+        message.append("RANDOM EFFECTS BY GROUP")
         for i in range(self.l):
-            print(f"\n{self.parameters[i].upper()}")
+            message.append(f"\n{self.parameters[i].upper()}")
             for j in range(self.num_groups):
-                print(f"group id {j}: {self.U[i][j]}")
+                message.append(f"group id {j}: {self.U[i][j]}")
 
+        message = '\n'.join(message)
+        if file is not None:
+            print(f"Printing to {file}")
+            with open(file, 'w') as f:
+                print(message, file=f)
+        else:
+            print(message)
