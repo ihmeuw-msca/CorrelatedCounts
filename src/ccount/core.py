@@ -126,7 +126,7 @@ class CorrelatedModel:
         if self.add_intercepts:
             X = self.intercept_X(X=X, m=self.m)
             self.d += 1
-        self.ci = bool(self.add_intercepts)
+        self.ci = int(self.add_intercepts)
 
         # center and scale the covariates, but keep the mean and std for use later on
         # if we're not normalizing the covariates, just make the mean 0 and std 1 to avoid
@@ -290,7 +290,7 @@ class CorrelatedModel:
         for i in range(self.l):
             for j in range(self.n):
                 X_list[i][j][:, self.ci:] = ((X_list[i][j][:, self.ci:] - self.X_mean[i][j][self.ci:]) /
-                                       self.X_std[i][j][self.ci:])
+                                             self.X_std[i][j][self.ci:])
         return X_list
 
     def compute_P(self, X, m, group_sizes, offset, beta=None, U=None):
@@ -535,9 +535,9 @@ class CorrelatedModel:
             group_id = np.arange(m)
         # offset for each parameter
         if offset is None:
-            offset = [np.zeros(m)] * self.l
+            offset = [np.ones((m, 1))] * self.l
         else:
-            offset = [off if off is not None else np.zeros(m) for off in offset]
+            offset = [off if off is not None else np.ones((m, 1)) for off in offset]
 
         # Check the type and dimensions of X and the groups
         self.check_new_X(X=normal_X_with_intercept, group_id=group_id)

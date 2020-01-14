@@ -48,13 +48,15 @@ class ZeroInflatedPoisson(CorrelatedModel):
     >>> zp = ZeroInflatedPoisson(m=ps.m, d=D, Y=Y, X=X)
     >>> zp.optimize_params()
     """
-    def __init__(self, m, n, d, Y, X, group_id=None, offset=None, weights=None, normalize_X=False):
+    def __init__(self, m, n, d, Y, X, group_id=None, offset=None, weights=None,
+                 add_intercepts=True, normalize_X=True):
         LOG.info("Initializing a Zero-Inflated Poisson Model")
         assert len(d) == 2
         assert len(X) == 2
         super().__init__(
             m=m, n=n, d=d, Y=Y.astype(np.number), X=X,
-            group_id=group_id, offset=offset, weights=weights, normalize_X=normalize_X,
+            group_id=group_id, offset=offset, weights=weights,
+            normalize_X=normalize_X, add_intercepts=add_intercepts,
             l=2, g=[lambda x: np.exp(x) / (1 + np.exp(x)), np.exp],
             f=NegLogLikelihoods.zi_poisson
         )
@@ -75,13 +77,15 @@ class ZeroInflatedPoissonSmoothReLU(CorrelatedModel):
     A Zero-Inflated Poisson likelihood with a Smooth ReLU link function
     rather than a log link for the Poisson mean.
     """
-    def __init__(self, m, n, d, Y, X, group_id=None, offset=None, weights=None):
+    def __init__(self, m, n, d, Y, X, group_id=None, offset=None, weights=None,
+                 add_intercepts=True, normalize_X=True):
         LOG.info("Initializing a Zero-Inflated Poisson SmoothReLU Model")
         assert len(d) == 2
         assert len(X) == 2
         super().__init__(
             m=m, n=n, d=d, Y=Y.astype(np.number), X=X,
             group_id=group_id, offset=offset, weights=weights,
+            add_intercepts=add_intercepts, normalize_X=normalize_X,
             l=2, g=[expit, smooth_ReLU],
             f=NegLogLikelihoods.zi_poisson
         )
@@ -95,12 +99,14 @@ class NegativeBinomial(CorrelatedModel):
     """
     A Negative Binomial Model.
     """
-    def __init__(self, m, n, d, Y, X, group_id=None, offset=None):
+    def __init__(self, m, n, d, Y, X, group_id=None, offset=None, weights=None,
+                 add_intercepts=True, normalize_X=True):
         LOG.info("Initializing a negative binomial model.")
         assert len(d) == 2
         assert len(X) == 2
         super().__init__(
             m=m, n=n, d=d, Y=Y.astype(np.number), X=X, group_id=group_id, offset=offset,
+            add_intercepts=add_intercepts, normalize_X=normalize_X, weights=weights,
             l=2, g=[np.exp, np.exp],
             f=NegLogLikelihoods.nbinom
         )
@@ -115,3 +121,10 @@ class NegativeBinomial(CorrelatedModel):
         k = P[1]  # The over-dispersion parameter is not used for the mean value calculation
         return theta
 
+
+MODEL_DICT = {
+    'hurdle_poisson': HurdlePoisson,
+    'negative_binomial': NegativeBinomial,
+    'zero_inflated_poisson': ZeroInflatedPoisson,
+    'zero_inflated_poisson_relu': ZeroInflatedPoissonSmoothReLU
+}
