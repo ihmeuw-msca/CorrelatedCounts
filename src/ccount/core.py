@@ -448,9 +448,9 @@ class CorrelatedModel:
             for X_kj in X_k:
                 assert isinstance(X_kj, np.ndarray)
                 assert X_kj.dtype == np.number
-        assert len(self.X) == self.l
-        assert all(len(self.X[k]) == self.n for k in range(self.l))
-        assert all(self.X[k][j].shape == (len(group_id), self.d[k, j])
+        assert len(X) == self.l
+        assert all(len(X[k]) == self.n for k in range(self.l))
+        assert all(X[k][j].shape == (len(group_id), self.d[k, j])
                    for k in range(self.l)
                    for j in range(self.n))
 
