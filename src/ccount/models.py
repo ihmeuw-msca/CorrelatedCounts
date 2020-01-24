@@ -14,13 +14,44 @@ class HurdlePoisson(CorrelatedModel):
     for the proportion of zeros, and a zero-truncated
     Poisson for the
     """
-    def __init__(self, m, n, d, Y, X, group_id=None, offset=None):
+    def __init__(self, m, n, d, Y, X, group_id=None, offset=None,
+                 add_intercepts=True, normalize_X=True):
         LOG.info("Initializing a Hurdle Poisson Model.")
         assert len(d) == 2
         assert len(X) == 2
         super().__init__(
             m=m, n=n, d=d, Y=Y.astype(np.number), X=X, group_id=group_id, offset=offset,
+            add_intercepts=add_intercepts, normalize_X=normalize_X,
             l=2, g=[expit, np.exp],
+            f=NegLogLikelihoods.hurdle_poisson
+        )
+        self.model_type = "Hurdle Poisson"
+        self.parameters = [
+            "Probability of Zero", "Mean of Poisson"
+        ]
+
+    @staticmethod
+    def mean_outcome(P):
+        p = P[0]
+        theta = P[1]
+        return (1 - p) * theta / (1 - np.exp(-theta))
+
+
+class HurdlePoissonSmoothReLU(CorrelatedModel):
+    """
+    A Hurdle Model. Has a binomial model
+    for the proportion of zeros, and a zero-truncated
+    Poisson for the likelihood, link function smooth ReLU
+    """
+    def __init__(self, m, n, d, Y, X, group_id=None, offset=None,
+                 add_intercepts=True, normalize_X=True):
+        LOG.info("Initializing a Hurdle Poisson Model.")
+        assert len(d) == 2
+        assert len(X) == 2
+        super().__init__(
+            m=m, n=n, d=d, Y=Y.astype(np.number), X=X, group_id=group_id, offset=offset,
+            add_intercepts=add_intercepts, normalize_X=normalize_X,
+            l=2, g=[expit, smooth_ReLU],
             f=NegLogLikelihoods.hurdle_poisson
         )
         self.model_type = "Hurdle Poisson"
@@ -94,6 +125,12 @@ class ZeroInflatedPoissonSmoothReLU(CorrelatedModel):
             "Probability of Structural Zero", "Mean of Poisson"
         ]
 
+    @staticmethod
+    def mean_outcome(P):
+        p = P[0]
+        theta = P[1]
+        return (1 - p) * theta
+
 
 class NegativeBinomial(CorrelatedModel):
     """
@@ -112,7 +149,7 @@ class NegativeBinomial(CorrelatedModel):
         )
         self.model_type = "Negative Binomial"
         self.parameters = [
-            "Mean of Poisson", "Over-Dispersion Parameter Variance"
+            "Mean", "Over-Dispersion Parameter Variance"
         ]
 
     @staticmethod
@@ -124,6 +161,7 @@ class NegativeBinomial(CorrelatedModel):
 
 MODEL_DICT = {
     'hurdle_poisson': HurdlePoisson,
+    'hurdle_poisson_relu': HurdlePoissonSmoothReLU,
     'negative_binomial': NegativeBinomial,
     'zero_inflated_poisson': ZeroInflatedPoisson,
     'zero_inflated_poisson_relu': ZeroInflatedPoissonSmoothReLU

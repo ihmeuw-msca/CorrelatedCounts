@@ -33,6 +33,8 @@ class OptimizationInterface:
         """
         self.cm = cm
         self.EVALUATIONS = 0
+        self.TOTAL_BETA_EVALUATIONS = 0
+        self.TOTAL_U_EVALUATIONS = 0
         self.n_iteration_print = n_iteration_print
 
     def objective_beta(self, vec):
@@ -125,6 +127,7 @@ class OptimizationInterface:
                                method="L-BFGS-B",
                                callback=self.callback_beta)
         self.cm.update_params(beta=utils.vec_to_beta(result.x, self.cm.d))
+        self.TOTAL_BETA_EVALUATIONS += self.EVALUATIONS
 
     def optimize_U(self):
         """Optimize random effects.
@@ -138,6 +141,7 @@ class OptimizationInterface:
                                method="L-BFGS-B",
                                callback=self.callback_U)
         self.cm.update_params(U=result.x.reshape(self.cm.U.shape))
+        self.TOTAL_U_EVALUATIONS += self.EVALUATIONS
 
     def compute_D(self):
         """Compute the sample covariance of the random effects.

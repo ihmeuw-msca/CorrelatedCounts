@@ -1,8 +1,6 @@
 import numpy as np
 from scipy.special import loggamma
 
-import warnings
-
 
 class NegLogLikelihoods:
 
