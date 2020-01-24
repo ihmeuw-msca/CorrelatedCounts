@@ -190,9 +190,52 @@
       
     
     
+      <label class="md-nav__link md-nav__link--active" for="__toc">
+        Methods
+      </label>
+    
     <a href="./" title="Methods" class="md-nav__link md-nav__link--active">
       Methods
     </a>
+    
+      
+<nav class="md-nav md-nav--secondary">
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">Table of contents</label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#offsets" class="md-nav__link">
+    Offsets
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#likelihood-weights" class="md-nav__link">
+    Likelihood Weights
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#optimization" class="md-nav__link">
+    Optimization
+  </a>
+  
+</li>
+      
+      
+      
+      
+      
+    </ul>
+  
+</nav>
     
   </li>
 
@@ -238,6 +281,36 @@
     
   
   
+    <label class="md-nav__title" for="__toc">Table of contents</label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#offsets" class="md-nav__link">
+    Offsets
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#likelihood-weights" class="md-nav__link">
+    Likelihood Weights
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#optimization" class="md-nav__link">
+    Optimization
+  </a>
+  
+</li>
+      
+      
+      
+      
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -257,9 +330,19 @@ E[Y_{i,j}|X_{i,j}, \beta, U_{i,j}] = X_{i,j} \beta_{j} + U_{i,j}
 </script>
 for the <script type="math/tex">i^{th}</script> observation and the <script type="math/tex">j^{th}</script> outcome, where <script type="math/tex">\epsilon_{i} \sim N(0, \sigma^2)</script> but with the additional assumption that the <script type="math/tex">U_{i,}</script> are multivariate normal, with mean 0 and covariance given by <script type="math/tex">D</script>.
 <script type="math/tex; mode=display">
-U_{i,} \sim N_{n}(0, D) \quad D \in \mathbb{R}^n
+U_{i,.} \sim N_{n}(0, D) \quad D \in \mathbb{R}^n
 </script>
-</p>
+The <script type="math/tex">U_{i,j}</script>'s are correlated with one another, and that correlation drives correlation in the mean. This method follows that outlined by <a href="https://www.tandfonline.com/doi/full/10.1080/02664763.2013.789098?scroll=top&amp;needAccess=true">Rodrigues-Motta and colleages (2012)</a>.</p>
+<p>In this simple case, <script type="math/tex">Y \sim Normal</script>, but when working with counts, it is more common to use discrete distributions like the Poisson distribution or the Negative Binomial distribution. In cases where we have extremely rare events, we may also consider extensions to these distributions that allow for more zeros than would be typically realized in the discrete distributions (e.g. zero-inflation, hurdle models). As such, we will usually have more than one parameter to estimate besides the <em>mean</em> outcome.</p>
+<p>Most generally, consider that now we have <script type="math/tex">l</script> parameters. We have some probability distribution for <script type="math/tex">Y</script>, that is dependent on <script type="math/tex">X_{i,j,k}</script>, <script type="math/tex">\beta_{j,k}</script> and <script type="math/tex">U_{i,j,k}</script>,
+<script type="math/tex; mode=display">
+f(Y_{i,j}|X_{i,j,k}, \beta_{j,k}, U_{i,j,k} \quad k = 1, ..., l)
+</script>
+where the covariates <script type="math/tex">X</script> and random effects <script type="math/tex">U</script> can differ with respect to each of the <script type="math/tex">l</script> parameters of the discrete distribution (e.g. the mean and the over-dispersion parameter for the variance in the Negative Binomial distribution). Depending on the support for the parameter, we may need to transform the linear combination of <script type="math/tex">X_{i,j,k} \beta_{j,k} + U_{i,j,k}</script> into the space that makes sense for the parameter and distribution at hand. For example, the mean of the Poisson distribution must be <script type="math/tex">>0</script>, so a natural <em>link function</em> that does this transformation is <script type="math/tex">e^{X_{i,j,k} \beta_{j,k} + U_{i,j,k}}</script>.</p>
+<h3 id="offsets">Offsets</h3>
+<h3 id="likelihood-weights">Likelihood Weights</h3>
+<h3 id="optimization">Optimization</h3>
+<p>To estimate the parameters of this model, we add a prior for <script type="math/tex">U</script> that incorporates <script type="math/tex">D</script>, and then optimize <script type="math/tex">f(Y_{i,j}|...)</script> with respect to <script type="math/tex">\beta</script>, <script type="math/tex">U</script> and <script type="math/tex">D</script>.</p>
                 
                   
                 
