@@ -8,6 +8,8 @@
 import numpy as np
 from copy import deepcopy
 from ccount import optimization
+from ccount import utils
+
 import logging
 
 LOG = logging.getLogger(__name__)
@@ -403,7 +405,10 @@ class CorrelatedModel:
                         max_iters=10,
                         optimize_beta=True,
                         optimize_U=True,
-                        compute_D=True):
+                        compute_D=True,
+                        rel_tol=None,
+                        max_beta_iters=1e3,
+                        max_U_iters=1e3):
         """Optimize the parameters.
 
         Parameters
@@ -416,20 +421,53 @@ class CorrelatedModel:
             Indicate if optimize U every iteration.
         compute_D: :obj: bool, optional
             Indicate if compute D every iteration.
+        rel_tol: int, optional
+            Relative tolerance to achieve. If rel_tol is achieved
+            before the max_iters, then the optimization will terminate.
+        max_beta_iters: int, optional
+            Maximum number of iterations for scipy.optimize for beta, in every
+            max_iters iteration
+        max_U_iters: int, option
+            Maximum number of iterations for scipy.optimize for U, in every
+            max_iters iteration
         """
         LOG.info("Optimizing the parameters.")
         for i in range(max_iters):
             LOG.info(f"On iteration {i}...")
+            error = 0
             if optimize_beta:
-                self.opt_interface.optimize_beta()
-                LOG.debug(f"Current beta is {self.beta}")
+                old_beta = deepcopy(self.beta)
+                self.opt_interface.optimize_beta(maxiter=max_beta_iters)
+                beta_error = utils.relative_error(
+                    old=utils.beta_to_vec(old_beta),
+                    new=utils.beta_to_vec(self.beta)
+                )
+                error += beta_error
+                LOG.debug(f"current beta is {self.beta}")
             if optimize_U:
-                self.opt_interface.optimize_U()
-                LOG.debug(f"Current U is {self.U}")
+                old_U = deepcopy(self.U)
+                self.opt_interface.optimize_U(maxiter=max_U_iters)
+                U_error = utils.relative_error(
+                    old=old_U, new=self.U
+                )
+                error += U_error
+                LOG.debug(f"current U is {self.U}")
             if compute_D:
+                old_D = deepcopy(self.D)
                 self.opt_interface.compute_D()
-                LOG.debug(f"Current D is {self.D}")
-            print("objective function value %8.2e" % self.neg_log_likelihood())
+                D_error = utils.relative_error(
+                    old=np.array([d[np.triu_indices(self.n)] for d in old_D]),
+                    new=np.array([d[np.triu_indices(self.n)] for d in self.D])
+                )
+                error += D_error
+                LOG.debug(f"current D is {self.D}; relative error {D_error}")
+            total_error = error / (optimize_beta + optimize_U + compute_D)
+            LOG.debug(f"total error is {total_error}")
+            if rel_tol is not None:
+                if total_error < rel_tol:
+                    LOG.info(f"optimization converged with tolerance {rel_tol} after {i} iterations")
+                    break
+            LOG.info("objective function value %8.2e" % self.neg_log_likelihood())
 
     def check_new_X(self, X, group_id):
         """

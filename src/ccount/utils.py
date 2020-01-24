@@ -51,6 +51,18 @@ def beta_to_vec(beta):
     return np.hstack(pieces)
 
 
+def relative_error(old, new):
+    """
+    Calculate the relative error between two arrays.
+    Args:
+        old: np.array
+        new: np.array
+
+    Returns: error
+    """
+    return np.linalg.norm(new - old) / np.linalg.norm(old)
+
+
 def split(vec, sizes):
     """Split the vector by sizes.
 
