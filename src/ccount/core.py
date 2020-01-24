@@ -443,7 +443,7 @@ class CorrelatedModel:
                     new=utils.beta_to_vec(self.beta)
                 )
                 error += beta_error
-                LOG.debug(f"current beta is {self.beta}")
+                LOG.debug(f"current beta is {self.beta}; relative error {beta_error}")
             if optimize_U:
                 old_U = deepcopy(self.U)
                 self.opt_interface.optimize_U(maxiter=max_U_iters)
@@ -451,7 +451,7 @@ class CorrelatedModel:
                     old=old_U, new=self.U
                 )
                 error += U_error
-                LOG.debug(f"current U is {self.U}")
+                LOG.debug(f"current U is {self.U}; relative error {U_error}")
             if compute_D:
                 old_D = deepcopy(self.D)
                 self.opt_interface.compute_D()
