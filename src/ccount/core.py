@@ -464,7 +464,7 @@ class CorrelatedModel:
             total_error = error / (optimize_beta + optimize_U + compute_D)
             LOG.debug(f"total error is {total_error}")
             if rel_tol is not None:
-                if total_error < rel_tol:
+                if total_error <= rel_tol:
                     LOG.info(f"optimization converged with tolerance {rel_tol} after {i} iterations")
                     break
             LOG.info("objective function value %8.2e" % self.neg_log_likelihood())
