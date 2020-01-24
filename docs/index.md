@@ -16,4 +16,3 @@ Once you have cloned the package, activate your conda envirionment and run
 cd CorrelatedCounts
 python setup.py install
 ```
-
