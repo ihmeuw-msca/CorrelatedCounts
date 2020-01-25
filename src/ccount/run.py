@@ -21,8 +21,8 @@ def initialize_model(model_type, **kwargs):
     return model_class(**kwargs)
 
 
-def df_to_model(model_type, df, outcome_variables,
-                fixed_effects, random_effect, offset, weight, **kwargs):
+def convert_df_to_model(model_type, df, outcome_variables,
+                        fixed_effects, random_effect, offset, weight, **kwargs):
     """
     Make a data frame with some outcomes and covariates into a
     correlated model.
@@ -91,8 +91,8 @@ def df_to_model(model_type, df, outcome_variables,
     )
 
 
-def add_predictions_to_df(model, df,
-                          fixed_effects, random_effect, offset):
+def get_predictions_from_df(model, df,
+                            fixed_effects, random_effect, offset):
     """
     Add predictions to a dataset from a model that has already been fit.
 
