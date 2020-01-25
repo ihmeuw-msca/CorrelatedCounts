@@ -22,7 +22,7 @@ def initialize_model(model_type, **kwargs):
 
 
 def df_to_model(model_type, df, outcome_variables,
-                fixed_effects, random_effect, offset, **kwargs):
+                fixed_effects, random_effect, offset, weight, **kwargs):
     """
     Make a data frame with some outcomes and covariates into a
     correlated model.
@@ -33,7 +33,8 @@ def df_to_model(model_type, df, outcome_variables,
         outcome_variables: (list)
         fixed_effects: (list)
         random_effect: (str)
-        offset: (str)
+        offset: (list)
+        weight: (list)
 
     Returns:
         ccount.core.CorrelatedModel
@@ -57,11 +58,12 @@ def df_to_model(model_type, df, outcome_variables,
     assert type(random_effect) == str
     assert random_effect in df.columns
 
-    assert type(offset) == list
-    for o in offset:
-        assert (type(o) == str) or (o is None)
-        if o is not None:
-            assert o in df.columns
+    if offset is not None:
+        assert type(offset) == list
+        for o in offset:
+            assert (type(o) == str) or (o is None)
+            if o is not None:
+                assert o in df.columns
 
     X = [
         [np.asarray(df[g]) if g is not None else None for g in f]
@@ -72,6 +74,9 @@ def df_to_model(model_type, df, outcome_variables,
     # Get random effects, offsets
     group_id = np.asarray(df[[random_effect]]).astype(int).ravel()
     offsets = [np.asarray(df[[o]]) if o is not None else None for o in offset]
+
+    if weight is not None:
+        weight = np.asarray(df[[weight, weight]])
     d = np.array([[x.shape[1] if x is not None else 0 for x in k] for k in X])
 
     return initialize_model(
@@ -81,6 +86,7 @@ def df_to_model(model_type, df, outcome_variables,
         d=d,
         Y=Y, X=X, group_id=group_id,
         offset=offsets,
+        weights=weight,
         **kwargs
     )
 
