@@ -1,5 +1,7 @@
 # Methods
 
+### Statistical Model
+
 The correlated counts framework is useful for modeling the occurrences of multiple outcomes that arise from the same individual or observational unit (e.g. location). Consider \(m\) observations, with \(n\) outcomes. For example, one might model the number of faculty (outcome n=1) and students (outcome n=2) at 100 universities. We model these in a correlated framework because it is reasonable to assume that the number of faculty at a university is likely correlated with the number of students.
 
 Returning to the general case with \(m\) observations and \(n\) outcomes, in the linear context, we assume that the mean of the outcome is a function of the covariates for this outcome \(X_{i,j}\), the coefficients to be estimated for this outcome \(\beta{j}\), and a random effect \(U_{i,j}\)
@@ -22,7 +24,13 @@ where the covariates \(X\) and random effects \(U\) can differ with respect to e
 
 ### Offsets
 
+Count data frequently arises from populations of varying sizes. For example, a count of deaths of 10 in a population of 100 represents a higher death rate than a 10 deaths in a population of 10,000. Therefore, when you have a model that you have parametrized such that some parameter affects the *mean* number of deaths, you will want to offset that mean by the population size.
+
+In a Poisson model with a log link, this looks like adding the log of the population size to the linear combination of predictors for the mean, before exponentiating (or equivalently multiplying the transformed linear combination by the population). Adding an offset for the mean model means that you are effectively modeling the rate per offset unit, rather than the count alone. *It is not advised to add an offset to parameters other than the mean.*
+
 ### Likelihood Weights
+
+You may want to weight data points differently depending on how certain those data points are relative to others. This is implemented with a weighted likelihood approach: the likelihood contribution for each data point is multiplied by its corresponding weight (if weights are supplied). This will up-weight the contribution of more certain data points to the estimation problem, and down-weight the contribution of more uncertain data points.
 
 ### Optimization
 
