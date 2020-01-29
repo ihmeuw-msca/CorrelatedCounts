@@ -370,7 +370,7 @@
 </li>
 </ul>
 <h3 id="example-specification">Example Specification</h3>
-<p>Consider a pandas data frame, <code>df</code>, that has the following columns: <code>deaths</code>, <code>cases</code>, <code>median_income</code>, <code>population</code>, <code>country</code>, <code>age</code>. If I wanted to fit a Zero-Inflated Poisson model (described <a href="../models/#zip">here</a>) with the following:</p>
+<p>Consider a pandas data frame, <code>df</code>, that has the following columns: <code>deaths</code>, <code>cases</code>, <code>median_income</code>, <code>population</code>, <code>country</code>, <code>age</code>. In my example below, I will fit a Zero-Inflated Poisson model (described <a href="../models/#zip">here</a>) with the following:</p>
 <p><em>Outcomes</em></p>
 <ul>
 <li>predict both deaths due to and cases of a disease, where deaths and cases are correlated with one another (2-dimensional outcome)</li>
@@ -410,7 +410,7 @@
 
 
 <p>You may pass in any integer for <code>max_iters</code>. A sensible range for the optimization routine implemented in this package is between 5-10 iterations.</p>
-<p>The parameter estimates, including the <script type="math/tex">\beta</script> fixed effects, the <script type="math/tex">U</script> random effects, and the correlation between the outcomes given by <script type="math/tex">D</script> are all available in the <code>summarize</code> class method for <code>ccount.core.CorrelatedModel</code>. In our example above, to get a printed summary of the estimates (both transformed and un-transformed based on the link functions described in <a href="../models/#choices">the model choices</a>), run the following:</p>
+<p>The parameter estimates, including the <script type="math/tex">\beta</script> fixed effects, the <script type="math/tex">U</script> random effects, and the correlation between the outcomes given by <script type="math/tex">D</script> (each described in <a href="../methods/">methods</a>) are all available in the <code>summarize</code> class method for <code>ccount.core.CorrelatedModel</code>. In our example above, to get a printed summary of the estimates (both transformed and un-transformed based on the link functions described in <a href="../models/#choices">the model choices</a>), run the following:</p>
 <div class="codehilite"><pre><span></span><span class="n">model</span><span class="p">.</span><span class="n">summarize</span><span class="p">()</span>
 </pre></div>
 
