@@ -57,6 +57,8 @@
     <link rel="stylesheet" href="assets/fonts/material-icons.css">
     
     
+      <link rel="stylesheet" href="css/custom.css">
+    
     
       
     
@@ -210,6 +212,13 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#recommended-usage" class="md-nav__link">
+    Recommended Usage
+  </a>
+  
+</li>
+      
       
       
       
@@ -291,6 +300,13 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#recommended-usage" class="md-nav__link">
+    Recommended Usage
+  </a>
+  
+</li>
+      
       
       
       
@@ -313,13 +329,29 @@
 <p>In order to run the correlated count models, you will need to install Python to your computer. It is most helpful to use <a href="https://docs.conda.io/en/latest/miniconda.html">miniconda</a>, and then create an environment that will be used specifically with the correlated count package. The dependencies for this package are <code>numpy</code> and <code>scipy</code>.</p>
 <h2 id="installation">Installation</h2>
 <p>To install the package, clone the GitHub repository here:</p>
-<pre><code>git clone https://github.com/mbannick/CorrelatedCounts.git
-</code></pre>
+<div class="codehilite"><pre><span></span><span class="n">git</span> <span class="n">clone</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="p">.</span><span class="n">com</span><span class="o">/</span><span class="n">mbannick</span><span class="o">/</span><span class="n">CorrelatedCounts</span><span class="p">.</span><span class="n">git</span>
+</pre></div>
+
 
 <p>Once you have cloned the package, activate your conda envirionment and run</p>
-<pre><code>cd CorrelatedCounts
-python setup.py install
-</code></pre>
+<div class="codehilite"><pre><span></span><span class="n">cd</span> <span class="n">CorrelatedCounts</span>
+<span class="n">python</span> <span class="n">setup</span><span class="p">.</span><span class="n">py</span> <span class="n">install</span>
+</pre></div>
+
+
+<p>The package name is <code>ccount</code>.</p>
+<h2 id="recommended-usage">Recommended Usage</h2>
+<p>We recommend using Jupyter Notebooks (documentation <a href="https://jupyter-notebook.readthedocs.io/en/stable/">here</a>) in your environment, which you can install with</p>
+<div class="codehilite"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">jupyter</span>
+</pre></div>
+
+
+<p>and then running the command</p>
+<div class="codehilite"><pre><span></span><span class="n">jupyter</span><span class="o">-</span><span class="n">notebook</span>
+</pre></div>
+
+
+<p>Once inside the notebook, you can import all of the functions that are described in the <a href="code/#running">code documentation</a>, including model <a href="code/#specification">specification</a>, <a href="code/#optimization">fitting</a>, and <a href="code/#predictions">prediction</a>.</p>
                 
                   
                 
