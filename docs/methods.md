@@ -26,7 +26,7 @@ where the covariates \(X\) and random effects \(U\) can differ with respect to e
 
 Count data frequently arises from populations of varying sizes. For example, a count of deaths of 10 in a population of 100 represents a higher death rate than a 10 deaths in a population of 10,000. Therefore, when you have a model that you have parametrized such that some parameter affects the *mean* number of deaths, you will want to offset that mean by the population size.
 
-In a Poisson model with a log link, this looks like adding the log of the population size to the linear combination of predictors for the mean, before exponentiating (or equivalently multiplying the transformed linear combination by the population). Adding an offset for the mean model means that you are effectively modeling the rate per offset unit, rather than the count alone. *It is not advised to add an offset to parameters other than the mean.*
+Adding an offset for the mean model means that you are effectively modeling the rate per offset unit, rather than the count alone. *It is not advised to add an offset to parameters other than the mean.*
 
 ### Likelihood Weights
 

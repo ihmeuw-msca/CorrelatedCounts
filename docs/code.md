@@ -21,7 +21,7 @@ The function that you can use to initialize a model is `ccount.run.convert_df_to
 
 ### Example Specification
 
-Consider a pandas data frame, `df`, that has the following columns: `deaths`, `cases`, `median_income`, `population`, `country`, `age`. If I wanted to fit a Zero-Inflated Poisson model (described [here](models.md#zip)) with the following:
+Consider a pandas data frame, `df`, that has the following columns: `deaths`, `cases`, `median_income`, `population`, `country`, `age`. In my example below, I will fit a Zero-Inflated Poisson model (described [here](models.md#zip)) with the following:
 
 *Outcomes*
 
@@ -66,7 +66,7 @@ model.optimize_params(max_iters=10)
 
 You may pass in any integer for `max_iters`. A sensible range for the optimization routine implemented in this package is between 5-10 iterations.
 
-The parameter estimates, including the \(\beta\) fixed effects, the \(U\) random effects, and the correlation between the outcomes given by \(D\) are all available in the `summarize` class method for `ccount.core.CorrelatedModel`. In our example above, to get a printed summary of the estimates (both transformed and un-transformed based on the link functions described in [the model choices](models.md#choices)), run the following:
+The parameter estimates, including the \(\beta\) fixed effects, the \(U\) random effects, and the correlation between the outcomes given by \(D\) (each described in [methods](methods.md)) are all available in the `summarize` class method for `ccount.core.CorrelatedModel`. In our example above, to get a printed summary of the estimates (both transformed and un-transformed based on the link functions described in [the model choices](models.md#choices)), run the following:
 
 ```
 model.summarize()

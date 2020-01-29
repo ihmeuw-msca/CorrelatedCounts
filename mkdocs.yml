@@ -9,3 +9,8 @@ extra_javascript:
     - 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-MML-AM_CHTML'
 markdown_extensions:
     - mdx_math
+    - admonition
+    - codehilite
+    - mkautodoc
+extra_css:
+    - css/custom.css
