@@ -1,3 +1,5 @@
+"""Easy functions for initializing a correlated count model."""
+
 import numpy as np
 
 from ccount.models import MODEL_DICT
@@ -7,10 +9,12 @@ def initialize_model(model_type, **kwargs):
     """
     Initialize a correlated count model
 
-    Args:
+    Arguments
+    ---------
         model_type: (str) likelihood + parameters to fit
 
-    Returns:
+    Returns
+    -------
         ccount.core.CorrelatedModel
     """
     try:
@@ -24,12 +28,13 @@ def initialize_model(model_type, **kwargs):
 def convert_df_to_model(model_type, df, outcome_variables,
                         fixed_effects, random_effect, offset, weight, **kwargs):
     """
-    Make a data frame with some outcomes and covariates into a
-    correlated model.
+    Convert a data frame to a correlated model.
 
-    Args:
-        model_type: (str)
-        df: (pd.DataFrame)
+    Take a data frame with some outcomes and covariates into a correlated model.
+
+    Parameters:
+        model_type: (str) the model type to run
+        df: (pd.DataFrame) data frame that has all variables
         outcome_variables: (list)
         fixed_effects: (list)
         random_effect: (str)
@@ -39,7 +44,6 @@ def convert_df_to_model(model_type, df, outcome_variables,
     Returns:
         ccount.core.CorrelatedModel
     """
-
     assert type(model_type) == str
     assert type(outcome_variables) == list
     for f in outcome_variables:
