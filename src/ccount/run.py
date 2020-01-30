@@ -26,7 +26,7 @@ def initialize_model(model_type, **kwargs):
 
 
 def convert_df_to_model(model_type, df, outcome_variables,
-                        fixed_effects, random_effect, offset, weight, **kwargs):
+                        fixed_effects, random_effect, offset=None, weight=None, **kwargs):
     """
     Convert a data frame to a correlated model.
 
