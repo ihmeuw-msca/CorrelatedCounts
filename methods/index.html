@@ -341,7 +341,7 @@
                 <h1 id="methods">Methods</h1>
 <h3 id="statistical-model">Statistical Model</h3>
 <p>The correlated counts framework is useful for modeling the occurrences of multiple outcomes that arise from the same individual or observational unit (e.g. location). Consider <script type="math/tex">m</script> observations, with <script type="math/tex">n</script> outcomes. For example, one might model the number of faculty (outcome n=1) and students (outcome n=2) at 100 universities. We model these in a correlated framework because it is reasonable to assume that the number of faculty at a university is likely correlated with the number of students.</p>
-<p>Returning to the general case with <script type="math/tex">m</script> observations and <script type="math/tex">n</script> outcomes, in the linear context, we assume that the mean of the outcome is a function of the covariates for this outcome <script type="math/tex">X_{i,j}</script>, the coefficients to be estimated for this outcome <script type="math/tex">\beta{j}</script>, and a random effect <script type="math/tex">U_{i,j}</script>
+<p>Returning to the general case with <script type="math/tex">m</script> observations and <script type="math/tex">n</script> outcomes, in the linear context, we assume that the mean of the outcome is a function of the covariates for this outcome <script type="math/tex">X_{i,j}</script>, the coefficients to be estimated for this outcome <script type="math/tex">\beta_{j}</script>, and a random effect <script type="math/tex">U_{i,j}</script>
 <script type="math/tex; mode=display">
 E[Y_{i,j}|X_{i,j}, \beta, U_{i,j}] = X_{i,j} \beta_{j} + U_{i,j}
 </script>
@@ -350,19 +350,27 @@ for the <script type="math/tex">i^{th}</script> observation and the <script type
 U_{i,.} \sim N_{n}(0, D) \quad D \in \mathbb{R}^n
 </script>
 The <script type="math/tex">U_{i,j}</script>'s are correlated with one another, and that correlation drives correlation in the mean. This method follows that outlined by <a href="https://www.tandfonline.com/doi/full/10.1080/02664763.2013.789098?scroll=top&amp;needAccess=true">Rodrigues-Motta and colleages (2012)</a>.</p>
-<p>In this simple case, <script type="math/tex">Y \sim Normal</script>, but when working with counts, it is more common to use discrete distributions like the Poisson distribution or the Negative Binomial distribution. In cases where we have extremely rare events, we may also consider extensions to these distributions that allow for more zeros than would be typically realized in the discrete distributions (e.g. zero-inflation, hurdle models). As such, we will usually have more than one parameter to estimate besides the <em>mean</em> outcome.</p>
+<p>In this simple case, <script type="math/tex">Y</script> follows a normal distribution, but when working with counts, it is more common to use discrete distributions like the Poisson distribution or the Negative Binomial distribution. In cases where we have extremely rare events, we may also consider extensions to these distributions that allow for more zeros than would be typically realized in the discrete distributions (e.g. zero-inflation, hurdle models). As such, we will usually have more than one parameter to estimate besides the <em>mean</em> outcome.</p>
 <p>Most generally, consider that now we have <script type="math/tex">l</script> parameters. We have some probability distribution for <script type="math/tex">Y</script>, that is dependent on <script type="math/tex">X_{i,j,k}</script>, <script type="math/tex">\beta_{j,k}</script> and <script type="math/tex">U_{i,j,k}</script>,
 <script type="math/tex; mode=display">
-f(Y_{i,j}|X_{i,j,k}, \beta_{j,k}, U_{i,j,k} \quad k = 1, ..., l)
+f(Y_{i,j}|X_{i,j,k}, \beta_{j,k}, U_{i,j,k}) \quad k = 1, ..., l
 </script>
 where the covariates <script type="math/tex">X</script> and random effects <script type="math/tex">U</script> can differ with respect to each of the <script type="math/tex">l</script> parameters of the discrete distribution (e.g. the mean and the over-dispersion parameter for the variance in the Negative Binomial distribution). Depending on the support for the parameter, we may need to transform the linear combination of <script type="math/tex">X_{i,j,k} \beta_{j,k} + U_{i,j,k}</script> into the space that makes sense for the parameter and distribution at hand. For example, the mean of the Poisson distribution must be <script type="math/tex">>0</script>, so a natural <em>link function</em> that does this transformation is <script type="math/tex">e^{X_{i,j,k} \beta_{j,k} + U_{i,j,k}}</script>.</p>
 <h3 id="offsets">Offsets</h3>
 <p>Count data frequently arises from populations of varying sizes. For example, a count of deaths of 10 in a population of 100 represents a higher death rate than a 10 deaths in a population of 10,000. Therefore, when you have a model that you have parametrized such that some parameter affects the <em>mean</em> number of deaths, you will want to offset that mean by the population size.</p>
-<p>Adding an offset for the mean model means that you are effectively modeling the rate per offset unit, rather than the count alone. <em>It is not advised to add an offset to parameters other than the mean.</em></p>
+<p>Adding an offset for the mean model means that you are effectively modeling the rate per offset unit, rather than the count alone. <em>It is not advised to add an offset to parameters other than the mean.</em><sup id="fnref:1"><a class="footnote-ref" href="#fn:1">1</a></sup></p>
 <h3 id="likelihood-weights">Likelihood Weights</h3>
 <p>You may want to weight data points differently depending on how certain those data points are relative to others. This is implemented with a weighted likelihood approach: the likelihood contribution for each data point is multiplied by its corresponding weight (if weights are supplied). This will up-weight the contribution of more certain data points to the estimation problem, and down-weight the contribution of more uncertain data points.</p>
 <h3 id="optimization">Optimization</h3>
 <p>To estimate the parameters of this model, we add a prior for <script type="math/tex">U</script> that incorporates <script type="math/tex">D</script>, and then optimize <script type="math/tex">f(Y_{i,j}|...)</script> with respect to <script type="math/tex">\beta</script>, <script type="math/tex">U</script> and <script type="math/tex">D</script>.</p>
+<div class="footnote">
+<hr />
+<ol>
+<li id="fn:1">
+<p>For the Poisson, Zero-Inflated Poisson, and Negative Binomial models, the offset on the mean translates to directly modeling the rate (with more weight given to data points with larger denominators), but for the Hurdle models, the offset on the mean is only an approximation of the rate.&#160;<a class="footnote-backref" href="#fnref:1" title="Jump back to footnote 1 in the text">&#8617;</a></p>
+</li>
+</ol>
+</div>
                 
                   
                 
