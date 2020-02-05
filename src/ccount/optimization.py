@@ -115,8 +115,13 @@ class OptimizationInterface:
 
         return g_vec
 
-    def optimize_beta(self):
-        """Optimize fixed effects.
+    def optimize_beta(self, maxiter=1e3):
+        """
+        Optimize fixed effects.
+
+        Args:
+            maxiter: (int)
+                Maximum number of iterations. Can be None.
         """
         LOG.info("Optimizing beta.")
         self.EVALUATIONS = 1
@@ -125,12 +130,18 @@ class OptimizationInterface:
                                utils.beta_to_vec(self.cm.beta),
                                jac=self.gradient_beta,
                                method="L-BFGS-B",
-                               callback=self.callback_beta)
+                               callback=self.callback_beta,
+                               options={'maxiter': maxiter})
         self.cm.update_params(beta=utils.vec_to_beta(result.x, self.cm.d))
         self.TOTAL_BETA_EVALUATIONS += self.EVALUATIONS
 
-    def optimize_U(self):
-        """Optimize random effects.
+    def optimize_U(self, maxiter=1e3):
+        """
+        Optimize random effects.
+
+        Args:
+            maxiter: (int)
+                Maximum number of iterations. Can be None.
         """
         LOG.info("Optimizing U.")
         self.EVALUATIONS = 1
@@ -139,7 +150,8 @@ class OptimizationInterface:
                                self.cm.U.flatten(),
                                jac=self.gradient_U,
                                method="L-BFGS-B",
-                               callback=self.callback_U)
+                               callback=self.callback_U,
+                               options={'maxiter': maxiter})
         self.cm.update_params(U=result.x.reshape(self.cm.U.shape))
         self.TOTAL_U_EVALUATIONS += self.EVALUATIONS
 
