@@ -139,6 +139,10 @@ class CorrelatedModel:
                 [[dim + spl.shape[1] if spl is not None else dim for dim, spl in zip(o, spline)]
                  for o, spline in zip(self.d, S)]
             )
+            # add on the full design matrix for the splines, if applicable
+            # do this before normalizing the covariates
+            X = [[np.concatenate([x, s], axis=1) if s is not None else x for x, s in zip(x_outcome, s_outcome)]
+                 for x_outcome, s_outcome in zip(X, S)]
 
         # center and scale the covariates, but keep the mean and std for use later on
         # if we're not normalizing the covariates, just make the mean 0 and std 1 to avoid
@@ -152,11 +156,6 @@ class CorrelatedModel:
 
         # normalize
         self.X = self.normalize_X(X=X)
-
-        # add on the full design matrix for the splines, if applicable
-        if S is not None:
-            self.X = [[np.concatenate([x, s], axis=1) if s is not None else x for x, s in zip(x_outcome, s_outcome)]
-                      for x_outcome, s_outcome in zip(self.X, S)]
 
         # link and log likelihood functions
         self.g = g
