@@ -5,10 +5,11 @@
 
     Core module for correlated count.
 """
+import logging
 import numpy as np
 from copy import deepcopy
+
 from ccount import optimization
-import logging
 
 LOG = logging.getLogger(__name__)
 
@@ -49,7 +50,7 @@ class CorrelatedModel:
     """
 
     def __init__(self, m, n, l, d, Y, X, g, f,
-                 group_id=None, offset=None, weights=None, add_intercepts=False, normalize_X=True):
+                 S=None, group_id=None, offset=None, weights=None, add_intercepts=False, normalize_X=True):
         """Correlated Model initialization method.
 
         Parameters
@@ -67,6 +68,9 @@ class CorrelatedModel:
         X : :obj: `list` of :obj: `list` of :obj: `numpy.ndarray`
             List of list of 2D arrays, storing the covariates for each parameter
             and outcome. (no intercept -- intercept automatically added)
+        S : :obj: `list` of :obj: `list` of :obj: `numpy.array`
+            List of list of arrays, storing the design matrix for a covariate to put a b-spline on for each parameter
+            and outcome.
         g : :obj: `list` of :obj: `function`
             List of link functions for each parameter.
         f : function
@@ -119,6 +123,9 @@ class CorrelatedModel:
         # data
         self.Y = Y
 
+        # use this later to grab only the covariate indices that were not on splines
+        self.cs = [[list(range(k.shape[1])) if k is not None else list() for k in j] for j in X]
+
         # add on an intercept for each parameter
         # and set the index of the first covariate
         # to be either after the intercept or the first covariate
@@ -127,6 +134,11 @@ class CorrelatedModel:
             X = self.intercept_X(X=X, m=self.m)
             self.d += 1
         self.ci = int(self.add_intercepts)
+        if S is not None:
+            self.d = np.array(
+                [[dim + spl.shape[1] if spl is not None else dim for dim, spl in zip(o, spline)]
+                 for o, spline in zip(self.d, S)]
+            )
 
         # center and scale the covariates, but keep the mean and std for use later on
         # if we're not normalizing the covariates, just make the mean 0 and std 1 to avoid
@@ -140,6 +152,11 @@ class CorrelatedModel:
 
         # normalize
         self.X = self.normalize_X(X=X)
+
+        # add on the full design matrix for the splines, if applicable
+        if S is not None:
+            self.X = [[np.concatenate([x, s], axis=1) if s is not None else x for x, s in zip(x_outcome, s_outcome)]
+                      for x_outcome, s_outcome in zip(self.X, S)]
 
         # link and log likelihood functions
         self.g = g
@@ -573,7 +590,8 @@ class CorrelatedModel:
                 message.append(f"OUTCOME {j}")
                 if self.add_intercepts:
                     message.append(f"value for observations with average covariate values: {self.beta[i][j][0]}")
-                message.append(f"estimated coefficients: {self.beta[i][j][self.ci:] / self.X_std[i][j][self.ci:]}")
+                message.append(f"estimated coefficients: "
+                               f"{self.beta[i][j][self.ci:][self.cs] / self.X_std[i][j][self.ci:][self.cs]}")
         message.append("\nTRANSFORMED")
         for i in range(self.l):
             message.append(f"\n{self.parameters[i].upper()}")

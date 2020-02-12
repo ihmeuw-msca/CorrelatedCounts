@@ -2,6 +2,7 @@
 
 import numpy as np
 
+from ccount.bsplines import spline_design_mat
 from ccount.models import MODEL_DICT
 
 
@@ -26,7 +27,7 @@ def initialize_model(model_type, **kwargs):
 
 
 def convert_df_to_model(model_type, df, outcome_variables,
-                        fixed_effects, random_effect, offset=None, weight=None, **kwargs):
+                        fixed_effects, random_effect, spline=None, offset=None, weight=None, **kwargs):
     """
     Convert a data frame to a correlated model.
 
@@ -37,6 +38,7 @@ def convert_df_to_model(model_type, df, outcome_variables,
         df: (pd.DataFrame) data frame that has all variables
         outcome_variables: (list)
         fixed_effects: (list)
+        spline: (list of list of dict) optional
         random_effect: (str)
         offset: (list)
         weight: (list)
@@ -59,6 +61,15 @@ def convert_df_to_model(model_type, df, outcome_variables,
                     assert c in df.columns
                     df = df.loc[~df[c].isnull()]
 
+    if spline is not None:
+        for s in spline:
+            assert type(s) == list
+            for g in s:
+                assert (type(g) == dict) or (g is None)
+                if g is not None:
+                    assert g['name'] in df.columns
+                    df = df.loc[~df[g['name']].isnull()]
+
     assert type(random_effect) == str
     assert random_effect in df.columns
 
@@ -73,6 +84,21 @@ def convert_df_to_model(model_type, df, outcome_variables,
         [np.asarray(df[g]) if g is not None else None for g in f]
         for f in fixed_effects
     ]
+    if spline is not None:
+        S = [[
+            spline_design_mat(
+                array=np.asarray(df[g['name']]),
+                knots_type=g['knots_type'],
+                knots_num=g['knots_num'],
+                degree=g['degree'],
+                l_linear=g['l_linear'],
+                r_linear=g['r_linear']
+            ) if g is not None else None for g in s]
+            for s in spline
+        ]
+    else:
+        S = None
+
     Y = np.asarray(df[outcome_variables])
 
     # Get random effects, offsets
@@ -88,7 +114,7 @@ def convert_df_to_model(model_type, df, outcome_variables,
         m=Y.shape[0],
         n=Y.shape[1],
         d=d,
-        Y=Y, X=X, group_id=group_id,
+        Y=Y, X=X, S=S, group_id=group_id,
         offset=offsets,
         weights=weight,
         **kwargs
