@@ -564,7 +564,7 @@ class CorrelatedModel:
                            "function for a model. Make sure you are not using this class directly. Subclass it"
                            "and over-write this method in your subclass.")
 
-    def predict(self, X, m, group_id=None, offset=None):
+    def predict(self, X, m, S=None, group_id=None, offset=None):
         """
         Predict the outcome matrix given a new X matrix and optional group IDs. If the group IDs
         don't fit the group IDs used to fit the model, then no random effects will be added on.
@@ -574,6 +574,7 @@ class CorrelatedModel:
                 and outcome (or None instead of array if no covariates)
             m: int
                 Number of observations
+            S: :obj: `list` of :obj: `list` of :obj: `np.array`
             group_id: :obj: `numpy.ndarray`, optional
                 Optional integer group id, gives the way of grouping the random
                 effects. When it is not `None`, it should have length `m`.
@@ -582,7 +583,11 @@ class CorrelatedModel:
         if self.add_intercepts:
             LOG.info("Adding an intercept because it was added in the original model."
                      "If this is incorrect, please take away the existing intercept, or fit a new model.")
-        normal_X_with_intercept = self.normalize_X(X=self.intercept_X(X=X, m=m))
+        X = self.intercept_X(X=X, m=m)
+        if S is not None:
+            X = [[np.concatenate([x, s], axis=1) if s is not None else x for x, s in zip(x_outcome, s_outcome)]
+                 for x_outcome, s_outcome in zip(X, S)]
+        normal_X_with_intercept = self.normalize_X(X=X)
         if group_id is None:
             # Get the number of rows in the very first X matrix
             group_id = np.arange(m)
