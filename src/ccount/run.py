@@ -2,6 +2,7 @@
 
 import numpy as np
 
+from ccount.bsplines import spline_design_mat
 from ccount.models import MODEL_DICT
 
 
@@ -26,7 +27,7 @@ def initialize_model(model_type, **kwargs):
 
 
 def convert_df_to_model(model_type, df, outcome_variables,
-                        fixed_effects, random_effect, offset=None, weight=None, **kwargs):
+                        fixed_effects, random_effect, spline=None, offset=None, weight=None, **kwargs):
     """
     Convert a data frame to a correlated model.
 
@@ -37,6 +38,7 @@ def convert_df_to_model(model_type, df, outcome_variables,
         df: (pd.DataFrame) data frame that has all variables
         outcome_variables: (list)
         fixed_effects: (list)
+        spline: (list of list of dict) optional
         random_effect: (str)
         offset: (list)
         weight: (list)
@@ -59,6 +61,15 @@ def convert_df_to_model(model_type, df, outcome_variables,
                     assert c in df.columns
                     df = df.loc[~df[c].isnull()]
 
+    if spline is not None:
+        for s in spline:
+            assert type(s) == list
+            for g in s:
+                assert (type(g) == dict) or (g is None)
+                if g is not None:
+                    assert g['name'] in df.columns
+                    df = df.loc[~df[g['name']].isnull()]
+
     assert type(random_effect) == str
     assert random_effect in df.columns
 
@@ -73,11 +84,29 @@ def convert_df_to_model(model_type, df, outcome_variables,
         [np.asarray(df[g]) if g is not None else None for g in f]
         for f in fixed_effects
     ]
+    if spline is not None:
+        S = [[
+            spline_design_mat(
+                array=np.asarray(df[g['name']]),
+                knots_type=g['knots_type'],
+                knots_num=g['knots_num'],
+                degree=g['degree'],
+                l_linear=g['l_linear'],
+                r_linear=g['r_linear']
+            ) if g is not None else None for g in s]
+            for s in spline
+        ]
+    else:
+        S = None
+
     Y = np.asarray(df[outcome_variables])
 
     # Get random effects, offsets
     group_id = np.asarray(df[[random_effect]]).astype(int).ravel()
-    offsets = [np.asarray(df[[o]]) if o is not None else None for o in offset]
+    if offset is not None:
+        offsets = [np.asarray(df[[o]]) if o is not None else None for o in offset]
+    else:
+        offsets = offset
 
     if weight is not None:
         weight = np.asarray(df[[weight, weight]])
@@ -88,7 +117,7 @@ def convert_df_to_model(model_type, df, outcome_variables,
         m=Y.shape[0],
         n=Y.shape[1],
         d=d,
-        Y=Y, X=X, group_id=group_id,
+        Y=Y, X=X, S=S, group_id=group_id,
         offset=offsets,
         weights=weight,
         **kwargs
@@ -96,15 +125,16 @@ def convert_df_to_model(model_type, df, outcome_variables,
 
 
 def get_predictions_from_df(model, df,
-                            fixed_effects, random_effect, offset):
+                            fixed_effects, random_effect, spline=None, offset=None):
     """
     Add predictions to a dataset from a model that has already been fit.
 
     Args:
         model: ccount.core.CorrelatedModel
         df: pd.DataFrame
-        fixed_effects: list of list of str
+        fixed_effects: list of list of list of str
         random_effect: str
+        spline: list of list of str
         offset: list of str
 
     Returns:
@@ -120,11 +150,30 @@ def get_predictions_from_df(model, df,
         [np.asarray(df[g]) if g is not None else None for g in f]
         for f in fixed_effects
     ]
-    offsets = [np.asarray(df[[o]]) if o is not None else None for o in offset]
+    if spline is not None:
+        S = [[
+            spline_design_mat(
+                array=np.asarray(df[g['name']]),
+                knots_type=g['knots_type'],
+                knots_num=g['knots_num'],
+                degree=g['degree'],
+                l_linear=g['l_linear'],
+                r_linear=g['r_linear']
+            ) if g is not None else None for g in s]
+            for s in spline
+        ]
+    else:
+        S = None
+
+    if offset is not None:
+        offsets = [np.asarray(df[[o]]) if o is not None else None for o in offset]
+    else:
+        offsets = None
     group_id = np.asarray(df[[random_effect]]).astype(int).ravel()
     return np.transpose(
         model.predict(
             X=X, m=len(df),
+            S=S,
             group_id=group_id,
             offset=offsets
         )

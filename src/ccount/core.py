@@ -5,12 +5,12 @@
 
     Core module for correlated count.
 """
+import logging
 import numpy as np
 from copy import deepcopy
+
 from ccount import optimization
 from ccount import utils
-
-import logging
 
 LOG = logging.getLogger(__name__)
 
@@ -51,7 +51,7 @@ class CorrelatedModel:
     """
 
     def __init__(self, m, n, l, d, Y, X, g, f,
-                 group_id=None, offset=None, weights=None, add_intercepts=False, normalize_X=True):
+                 S=None, group_id=None, offset=None, weights=None, add_intercepts=False, normalize_X=True):
         """Correlated Model initialization method.
 
         Parameters
@@ -69,6 +69,9 @@ class CorrelatedModel:
         X : :obj: `list` of :obj: `list` of :obj: `numpy.ndarray`
             List of list of 2D arrays, storing the covariates for each parameter
             and outcome. (no intercept -- intercept automatically added)
+        S : :obj: `list` of :obj: `list` of :obj: `numpy.array`
+            List of list of arrays, storing the design matrix for a covariate to put a b-spline on for each parameter
+            and outcome.
         g : :obj: `list` of :obj: `function`
             List of link functions for each parameter.
         f : function
@@ -121,6 +124,9 @@ class CorrelatedModel:
         # data
         self.Y = Y
 
+        # use this later to grab only the covariate indices that were not on splines
+        self.cs = [[list(range(k.shape[1])) if k is not None else list() for k in j] for j in X]
+
         # add on an intercept for each parameter
         # and set the index of the first covariate
         # to be either after the intercept or the first covariate
@@ -129,6 +135,15 @@ class CorrelatedModel:
             X = self.intercept_X(X=X, m=self.m)
             self.d += 1
         self.ci = int(self.add_intercepts)
+        if S is not None:
+            self.d = np.array(
+                [[dim + spl.shape[1] if spl is not None else dim for dim, spl in zip(o, spline)]
+                 for o, spline in zip(self.d, S)]
+            )
+            # add on the full design matrix for the splines, if applicable
+            # do this before normalizing the covariates
+            X = [[np.concatenate([x, s], axis=1) if s is not None else x for x, s in zip(x_outcome, s_outcome)]
+                 for x_outcome, s_outcome in zip(X, S)]
 
         # center and scale the covariates, but keep the mean and std for use later on
         # if we're not normalizing the covariates, just make the mean 0 and std 1 to avoid
@@ -443,7 +458,7 @@ class CorrelatedModel:
                     new=utils.beta_to_vec(self.beta)
                 )
                 error += beta_error
-                LOG.debug(f"current beta is {self.beta}; relative error {beta_error}")
+                LOG.debug(f"current beta is {self.beta} \nrelative error {beta_error}")
             if optimize_U:
                 old_U = deepcopy(self.U)
                 self.opt_interface.optimize_U(maxiter=max_U_iters)
@@ -451,7 +466,7 @@ class CorrelatedModel:
                     old=old_U, new=self.U
                 )
                 error += U_error
-                LOG.debug(f"current U is {self.U}; relative error {U_error}")
+                LOG.debug(f"current U is {self.U} \nrelative error {U_error}")
             if compute_D:
                 old_D = deepcopy(self.D)
                 self.opt_interface.compute_D()
@@ -460,7 +475,7 @@ class CorrelatedModel:
                     new=np.array([d[np.triu_indices(self.n)] for d in self.D])
                 )
                 error += D_error
-                LOG.debug(f"current D is {self.D}; relative error {D_error}")
+                LOG.debug(f"current D is {self.D} \nrelative error {D_error}")
             total_error = error / (optimize_beta + optimize_U + compute_D)
             LOG.debug(f"total error is {total_error}")
             if rel_tol is not None:
@@ -549,7 +564,7 @@ class CorrelatedModel:
                            "function for a model. Make sure you are not using this class directly. Subclass it"
                            "and over-write this method in your subclass.")
 
-    def predict(self, X, m, group_id=None, offset=None):
+    def predict(self, X, m, S=None, group_id=None, offset=None):
         """
         Predict the outcome matrix given a new X matrix and optional group IDs. If the group IDs
         don't fit the group IDs used to fit the model, then no random effects will be added on.
@@ -559,6 +574,7 @@ class CorrelatedModel:
                 and outcome (or None instead of array if no covariates)
             m: int
                 Number of observations
+            S: :obj: `list` of :obj: `list` of :obj: `np.array`
             group_id: :obj: `numpy.ndarray`, optional
                 Optional integer group id, gives the way of grouping the random
                 effects. When it is not `None`, it should have length `m`.
@@ -567,7 +583,11 @@ class CorrelatedModel:
         if self.add_intercepts:
             LOG.info("Adding an intercept because it was added in the original model."
                      "If this is incorrect, please take away the existing intercept, or fit a new model.")
-        normal_X_with_intercept = self.normalize_X(X=self.intercept_X(X=X, m=m))
+        X = self.intercept_X(X=X, m=m)
+        if S is not None:
+            X = [[np.concatenate([x, s], axis=1) if s is not None else x for x, s in zip(x_outcome, s_outcome)]
+                 for x_outcome, s_outcome in zip(X, S)]
+        normal_X_with_intercept = self.normalize_X(X=X)
         if group_id is None:
             # Get the number of rows in the very first X matrix
             group_id = np.arange(m)
@@ -611,7 +631,8 @@ class CorrelatedModel:
                 message.append(f"OUTCOME {j}")
                 if self.add_intercepts:
                     message.append(f"value for observations with average covariate values: {self.beta[i][j][0]}")
-                message.append(f"estimated coefficients: {self.beta[i][j][self.ci:] / self.X_std[i][j][self.ci:]}")
+                message.append(f"estimated coefficients: "
+                               f"{self.beta[i][j][self.ci:][self.cs] / self.X_std[i][j][self.ci:][self.cs]}")
         message.append("\nTRANSFORMED")
         for i in range(self.l):
             message.append(f"\n{self.parameters[i].upper()}")
