@@ -458,7 +458,7 @@ class CorrelatedModel:
                     new=utils.beta_to_vec(self.beta)
                 )
                 error += beta_error
-                LOG.debug(f"current beta is {self.beta}; relative error {beta_error}")
+                LOG.debug(f"current beta is {self.beta} \nrelative error {beta_error}")
             if optimize_U:
                 old_U = deepcopy(self.U)
                 self.opt_interface.optimize_U(maxiter=max_U_iters)
@@ -466,7 +466,7 @@ class CorrelatedModel:
                     old=old_U, new=self.U
                 )
                 error += U_error
-                LOG.debug(f"current U is {self.U}; relative error {U_error}")
+                LOG.debug(f"current U is {self.U} \nrelative error {U_error}")
             if compute_D:
                 old_D = deepcopy(self.D)
                 self.opt_interface.compute_D()
@@ -475,7 +475,7 @@ class CorrelatedModel:
                     new=np.array([d[np.triu_indices(self.n)] for d in self.D])
                 )
                 error += D_error
-                LOG.debug(f"current D is {self.D}; relative error {D_error}")
+                LOG.debug(f"current D is {self.D} \nrelative error {D_error}")
             total_error = error / (optimize_beta + optimize_U + compute_D)
             LOG.debug(f"total error is {total_error}")
             if rel_tol is not None:
