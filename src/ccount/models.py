@@ -14,13 +14,13 @@ class HurdlePoisson(CorrelatedModel):
     for the proportion of zeros, and a zero-truncated
     Poisson for the
     """
-    def __init__(self, m, n, d, Y, X, S=None, group_id=None, offset=None,
+    def __init__(self, m, n, d, Y, X, S=None, group_id=None, weights=None, offset=None,
                  add_intercepts=True, normalize_X=True):
         LOG.info("Initializing a Hurdle Poisson Model.")
         assert len(d) == 2
         assert len(X) == 2
         super().__init__(
-            m=m, n=n, d=d, Y=Y.astype(np.number), X=X, S=S, group_id=group_id, offset=offset,
+            m=m, n=n, d=d, Y=Y.astype(np.number), X=X, S=S, group_id=group_id, weights=weights, offset=offset,
             add_intercepts=add_intercepts, normalize_X=normalize_X,
             l=2, g=[expit, np.exp],
             f=NegLogLikelihoods.hurdle_poisson
@@ -43,13 +43,13 @@ class HurdlePoissonSmoothReLU(CorrelatedModel):
     for the proportion of zeros, and a zero-truncated
     Poisson for the likelihood, link function smooth ReLU
     """
-    def __init__(self, m, n, d, Y, X, S=None, group_id=None, offset=None,
+    def __init__(self, m, n, d, Y, X, S=None, group_id=None, weights=None, offset=None,
                  add_intercepts=True, normalize_X=True):
         LOG.info("Initializing a Hurdle Poisson Model.")
         assert len(d) == 2
         assert len(X) == 2
         super().__init__(
-            m=m, n=n, d=d, Y=Y.astype(np.number), X=X, S=S, group_id=group_id, offset=offset,
+            m=m, n=n, d=d, Y=Y.astype(np.number), X=X, S=S, group_id=group_id, weights=weights, offset=offset,
             add_intercepts=add_intercepts, normalize_X=normalize_X,
             l=2, g=[expit, smooth_ReLU],
             f=NegLogLikelihoods.hurdle_poisson
