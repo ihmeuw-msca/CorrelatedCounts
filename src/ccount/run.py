@@ -38,7 +38,7 @@ def convert_df_to_model(model_type, df, outcome_variables,
         df: (pd.DataFrame) data frame that has all variables
         outcome_variables: (list)
         fixed_effects: (list)
-        spline: (list of list of dict) optional
+        spline: (list of list of list of dict) optional
         random_effect: (str)
         offset: (list)
         weight: (list)
@@ -65,10 +65,11 @@ def convert_df_to_model(model_type, df, outcome_variables,
         for s in spline:
             assert type(s) == list
             for g in s:
-                assert (type(g) == dict) or (g is None)
+                assert (type(g) == list) or (g is None)
                 if g is not None:
-                    assert g['name'] in df.columns
-                    df = df.loc[~df[g['name']].isnull()]
+                    for c in g:
+                        assert c['name'] in df.columns
+                        df = df.loc[~df[c['name']].isnull()]
 
     assert type(random_effect) == str
     assert random_effect in df.columns
@@ -86,15 +87,17 @@ def convert_df_to_model(model_type, df, outcome_variables,
     ]
     if spline is not None:
         S = [[
-            spline_design_mat(
-                array=np.asarray(df[g['name']]),
-                knots_type=g['knots_type'],
-                knots_num=g['knots_num'],
-                degree=g['degree'],
-                l_linear=g['l_linear'],
-                r_linear=g['r_linear']
-            ) if g is not None else None for g in s]
-            for s in spline
+                np.concatenate([
+                    spline_design_mat(
+                        array=np.asarray(df[g['name']]),
+                        knots_type=g['knots_type'],
+                        knots_num=g['knots_num'],
+                        degree=g['degree'],
+                        l_linear=g['l_linear'],
+                        r_linear=g['r_linear']
+                    ) for g in g_dict
+                ], axis=1) if g_dict is not None else None for g_dict in s
+            ] for s in spline
         ]
     else:
         S = None
@@ -152,15 +155,17 @@ def get_predictions_from_df(model, df,
     ]
     if spline is not None:
         S = [[
-            spline_design_mat(
-                array=np.asarray(df[g['name']]),
-                knots_type=g['knots_type'],
-                knots_num=g['knots_num'],
-                degree=g['degree'],
-                l_linear=g['l_linear'],
-                r_linear=g['r_linear']
-            ) if g is not None else None for g in s]
-            for s in spline
+                np.concatenate([
+                    spline_design_mat(
+                        array=np.asarray(df[g['name']]),
+                        knots_type=g['knots_type'],
+                        knots_num=g['knots_num'],
+                        degree=g['degree'],
+                        l_linear=g['l_linear'],
+                        r_linear=g['r_linear']
+                    ) for g in g_dict
+                ], axis=1) if g_dict is not None else None for g_dict in s
+            ] for s in spline
         ]
     else:
         S = None
