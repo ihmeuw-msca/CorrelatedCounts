@@ -632,7 +632,7 @@ class CorrelatedModel:
                 if self.add_intercepts:
                     message.append(f"value for observations with average covariate values: {self.beta[i][j][0]}")
                 message.append(f"estimated coefficients: "
-                               f"{self.beta[i][j][self.ci:][self.cs] / self.X_std[i][j][self.ci:][self.cs]}")
+                               f"{self.beta[i][j][self.ci:][self.cs[i][j]] / self.X_std[i][j][self.ci:][self.cs[i][j]]}")
         message.append("\nTRANSFORMED")
         for i in range(self.l):
             message.append(f"\n{self.parameters[i].upper()}")
