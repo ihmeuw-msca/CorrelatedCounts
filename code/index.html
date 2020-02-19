@@ -243,6 +243,13 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#spline-specification" class="md-nav__link">
+    Spline Specification
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#example-specification" class="md-nav__link">
     Example Specification
   </a>
@@ -279,6 +286,18 @@
   </li>
 
     
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href="../updates/" title="Release Notes" class="md-nav__link">
+      Release Notes
+    </a>
+  </li>
+
+    
   </ul>
 </nav>
                   </div>
@@ -306,6 +325,13 @@
   
     <nav class="md-nav">
       <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#spline-specification" class="md-nav__link">
+    Spline Specification
+  </a>
+  
+</li>
         
           <li class="md-nav__item">
   <a href="#example-specification" class="md-nav__link">
@@ -361,6 +387,7 @@
 <li><code>outcome_variables</code>: <code>(List[str])</code> A list of the names of the outcome variables.</li>
 <li><code>fixed_effects</code>: <code>(List[List[List[str] or None]])</code> Nested lists of the names of fixed effects to put on each of the parameters and outcomes. See <a href="../models/#parametrization">here</a> for details. If you do <strong>not</strong> want to put any covariates on a parameter-outcome combination, pass <code>None</code> instead of <code>List[str]</code>. <em>Note: Intercepts are automatically added for each parameter-outcome. Do not add another intercept.</em></li>
 <li><code>random_effect</code>: <code>(str)</code> Name of the variable that specifies the grouping of the random effect.</li>
+<li><code>spline</code>: <code>(List[List[List[dict] or None]])</code> Nested lists of dictionaries that gives the spline specification</li>
 <li><code>offset</code>: <code>List[str]</code> (optional) List of variable names to use as an offset for each parameter. Must be of the length of the number of parameters in each model, <strong>and in the correct order</strong>. See <a href="../models/#choices">here</a> for the number and order of parameters for each model type. To include an offset on only one parameter, pass a list of the variable name and <code>None</code>, in the correct order corresponding to your model type.</li>
 <li><code>weight</code>: <code>(str)</code> (optional) Name of the variable that specifies the weight to place on each observation.</li>
 <li><code>**kwargs</code>: Additional arguments<ul>
@@ -368,6 +395,17 @@
 <li><code>add_intercepts</code>: <code>(bool)</code> Whether or not to add intercepts for all parameter-outcomes. By default, <code>add_intercepts = True</code>.</li>
 </ul>
 </li>
+</ul>
+<h4 id="spline-specification">Spline Specification</h4>
+<p>Fitting a spline requires additional information. For each spline that you want to add, you pass a dictionary rather than a string (like you do for fixed effects).
+The dictionary must have the following keys:</p>
+<ul>
+<li><code>name</code>: <code>(str)</code> variable name in your dataset for the spline</li>
+<li><code>knots_type</code>: <code>(str)</code> one of <code>"frequency"</code> (put the knots at equal quantiles of the data) or <code>"domain"</code> (put the knots at equal spacings over the domain of the variable)</li>
+<li><code>knots_num</code>: <code>(int)</code> number of knots for the spline</li>
+<li><code>degree</code>: <code>(int)</code> degree of differentiation for the spline (e.g. degree of 3 is a cubic spline, most common for this application)</li>
+<li><code>r_linear</code>: <code>(bool)</code> enforce linear function (rather than a potentially degree &gt; 1 spline) at the tails of your data on the <em>right</em></li>
+<li><code>l_linear</code>: <code>(bool)</code> enforce linear function (rather than a potentially degree &gt; 1 spline) at the tails of your data on the <em>left</em></li>
 </ul>
 <h3 id="example-specification">Example Specification</h3>
 <p>Consider a pandas data frame, <code>df</code>, that has the following columns: <code>deaths</code>, <code>cases</code>, <code>median_income</code>, <code>population</code>, <code>country</code>, <code>age</code>. In my example below, I will fit a Zero-Inflated Poisson model (described <a href="../models/#zip">here</a>) with the following:</p>
@@ -381,6 +419,21 @@
 <li>age as a predictor for the mean of cases</li>
 <li>no predictors for the probability of a structural zero</li>
 </ul>
+<p><em>Splines</em>
+- a spline over calendar year with 3 degrees of freedom (cubic), and 3 knots (two at the min and max of the variable, one at the median), no linearity in tails
+- only applied to the mean, but applied to both cases and deaths</p>
+<p>Let's specify the spline here, and in the example we will apply the spline specification to the mean function for both outcomes.</p>
+<div class="codehilite"><pre><span></span><span class="n">spline_specs</span> <span class="o">=</span> <span class="err">{</span>
+    <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="s1">&#39;year&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;knots_type&#39;</span><span class="p">:</span> <span class="s1">&#39;frequency&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;knots_num&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+    <span class="s1">&#39;degree&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+    <span class="s1">&#39;r_linear&#39;</span><span class="p">:</span> <span class="k">False</span><span class="p">,</span>
+    <span class="s1">&#39;l_linear&#39;</span><span class="p">:</span> <span class="k">False</span>
+<span class="err">}</span>
+</pre></div>
+
+
 <p><em>Random Effect</em></p>
 <ul>
 <li>random effect grouping by country, so that all data points within the same country will have the same 2-dimensional realization that correlates their deaths with their cases</li>
@@ -397,7 +450,10 @@
     <span class="n">outcome_variables</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;deaths&#39;</span><span class="p">,</span> <span class="s1">&#39;cases&#39;</span><span class="p">],</span>
     <span class="n">fixed_effects</span><span class="o">=</span><span class="p">[[</span><span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">],</span> <span class="p">[[</span><span class="s1">&#39;median_income&#39;</span><span class="p">],</span> <span class="p">[</span><span class="s1">&#39;age&#39;</span><span class="p">]]],</span>
     <span class="n">random_effect</span><span class="o">=</span><span class="s1">&#39;country&#39;</span><span class="p">,</span>
-    <span class="n">offset</span><span class="o">=</span><span class="p">[</span><span class="bp">None</span><span class="p">,</span> <span class="s1">&#39;population&#39;</span><span class="p">]</span>
+    <span class="n">offset</span><span class="o">=</span><span class="p">[</span><span class="bp">None</span><span class="p">,</span> <span class="s1">&#39;population&#39;</span><span class="p">],</span>
+    <span class="n">spline</span><span class="o">=</span><span class="p">[[</span><span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">],</span>
+        <span class="p">[[</span><span class="n">spline_specs</span><span class="p">],</span> <span class="p">[</span><span class="n">spline_specs</span><span class="p">]]</span>
+    <span class="p">]</span>
 <span class="p">)</span>
 </pre></div>
 
@@ -405,17 +461,23 @@
 <h2 id="fitting-the-model"><a href="#optimization">Fitting the Model</a></h2>
 <p>Once you have the model object, returned by the function <code>model = convert_df_to_model(...)</code>, we can estimate the parameters. The class method <code>ccount.core.CorrelatedModel.optimize_params</code> does the optimization work.</p>
 <p>From our example above, to fit the model, we simply run:</p>
-<div class="codehilite"><pre><span></span><span class="n">model</span><span class="p">.</span><span class="n">optimize_params</span><span class="p">(</span><span class="n">max_iters</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<div class="codehilite"><pre><span></span><span class="n">model</span><span class="p">.</span><span class="n">optimize_params</span><span class="p">(</span><span class="n">max_iters</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">max_beta_iters</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">max_U_iters</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">rel_tol</span><span class="o">=</span><span class="mi">1</span><span class="n">e</span><span class="o">-</span><span class="mi">4</span><span class="p">)</span>
 </pre></div>
 
 
-<p>You may pass in any integer for <code>max_iters</code>. A sensible range for the optimization routine implemented in this package is between 5-10 iterations.</p>
+<p>The parameters that are being optimized are the fixed effects and random effects. The optimization happens iteratively,
+and you may not need to completely optimize the fixed and random effects in each overall iteration. To control this process, you 
+may pass in any integer for <code>max_iters</code>, <code>max_beta_iters</code>, and <code>max_U_iters</code>. You can also
+include a relative tolerance for the total error in the fixed and random effects with the argument <code>rel_tol</code>, and the 
+program will terminate if it reaches <code>rel_tol</code> before completing <code>max_iters</code> iterations. We recommend the defaults above for all
+of these arguments.</p>
 <p>The parameter estimates, including the <script type="math/tex">\beta</script> fixed effects, the <script type="math/tex">U</script> random effects, and the correlation between the outcomes given by <script type="math/tex">D</script> (each described in <a href="../methods/">methods</a>) are all available in the <code>summarize</code> class method for <code>ccount.core.CorrelatedModel</code>. In our example above, to get a printed summary of the estimates (both transformed and un-transformed based on the link functions described in <a href="../models/#choices">the model choices</a>), run the following:</p>
-<div class="codehilite"><pre><span></span><span class="n">model</span><span class="p">.</span><span class="n">summarize</span><span class="p">()</span>
+<div class="codehilite"><pre><span></span><span class="n">model</span><span class="p">.</span><span class="n">summarize</span><span class="p">(</span><span class="n">file</span><span class="o">=</span><span class="p">...)</span>
 </pre></div>
 
 
-<p>If you want to save the model summary to a file so that you can access it later, pass <code>file=...</code> and it will re-route the output to whatever file name (must have a <code>.txt</code> extension) that you pass.</p>
+<p>If you want to save the model summary to a file so that you can access it later, pass <code>file=...</code> and it will re-route the output to whatever file name (must have a <code>.txt</code> extension) that you pass.
+If you do not pass a file, i.e. <code>file=None</code>, then it will return the summary in your session.</p>
 <h2 id="creating-predictions"><a href="#predictions">Creating Predictions</a></h2>
 <p>In order to get the fitted values of deaths and cases, you can use the function <code>ccount.run.get_predictions_from_df</code>. It takes the same arguments as <code>convert_df_to_model</code>, except that in place of <code>model_type</code>, it needs a <code>ccount.core.CorrelatedModel</code> object, and it does not need the outcome variables. For our example above, this looks like</p>
 <div class="codehilite"><pre><span></span><span class="kn">from</span> <span class="nn">ccount.run</span> <span class="kn">import</span> <span class="n">get_predictions_from_df</span>
@@ -425,7 +487,10 @@
     <span class="n">df</span><span class="o">=</span><span class="n">some_df</span><span class="p">,</span>
     <span class="n">fixed_effects</span><span class="o">=</span><span class="p">[[</span><span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">],</span> <span class="p">[[</span><span class="s1">&#39;median_income&#39;</span><span class="p">],</span> <span class="p">[</span><span class="s1">&#39;age&#39;</span><span class="p">]]],</span>
     <span class="n">random_effect</span><span class="o">=</span><span class="s1">&#39;country&#39;</span><span class="p">,</span>
-    <span class="n">offset</span><span class="o">=</span><span class="p">[</span><span class="bp">None</span><span class="p">,</span> <span class="s1">&#39;population&#39;</span><span class="p">]</span>
+    <span class="n">offset</span><span class="o">=</span><span class="p">[</span><span class="bp">None</span><span class="p">,</span> <span class="s1">&#39;population&#39;</span><span class="p">],</span>
+    <span class="n">spline</span><span class="o">=</span><span class="p">[[</span><span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">],</span>
+        <span class="p">[[</span><span class="n">spline_specs</span><span class="p">],</span> <span class="p">[</span><span class="n">spline_specs</span><span class="p">]]</span>
+    <span class="p">]</span>
 <span class="p">)</span>
 </pre></div>
 
@@ -468,6 +533,20 @@
             </div>
           </a>
         
+        
+          <a href="../updates/" title="Release Notes" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
+            <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
+              <span class="md-flex__ellipsis">
+                <span class="md-footer-nav__direction">
+                  Next
+                </span>
+                Release Notes
+              </span>
+            </div>
+            <div class="md-flex__cell md-flex__cell--shrink">
+              <i class="md-icon md-icon--arrow-forward md-footer-nav__button"></i>
+            </div>
+          </a>
         
       </nav>
     </div>
