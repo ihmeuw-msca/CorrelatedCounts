@@ -125,7 +125,10 @@ predictions = get_predictions_from_df(
     df=some_df,
     fixed_effects=[[None, None], [['median_income'], ['age']]],
     random_effect='country',
-    offset=[None, 'population']
+    offset=[None, 'population'],
+    spline=[[None, None],
+        [[spline_specs], [spline_specs]]
+    ]
 )
 ```
 
