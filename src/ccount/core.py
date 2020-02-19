@@ -640,7 +640,7 @@ class CorrelatedModel:
                 message.append(f"OUTCOME {j}")
                 if self.add_intercepts:
                     message.append(f"value for observations with average covariate values: {self.g[i](self.beta[i][j][0])}")
-                message.append(f"estimated coefficients: {self.g[i](self.beta[i][j][self.ci:] / self.X_std[i][j][self.ci:])}")
+                message.append(f"estimated coefficients: {self.g[i](self.beta[i][j][self.ci:][self.cs[i][j]] / self.X_std[i][j][self.ci:][self.cs[i][j]])}")
         message.append("------------------------------------------")
         message.append("RANDOM EFFECTS")
         message.append("------------------------------------------")

@@ -22,6 +22,14 @@ f(Y_{i,j}|X_{i,j,k}, \beta_{j,k}, U_{i,j,k}) \quad k = 1, ..., l
 $$
 where the covariates \(X\) and random effects \(U\) can differ with respect to each of the \(l\) parameters of the discrete distribution (e.g. the mean and the over-dispersion parameter for the variance in the Negative Binomial distribution). Depending on the support for the parameter, we may need to transform the linear combination of \(X_{i,j,k} \beta_{j,k} + U_{i,j,k}\) into the space that makes sense for the parameter and distribution at hand. For example, the mean of the Poisson distribution must be \(>0\), so a natural *link function* that does this transformation is \(e^{X_{i,j,k} \beta_{j,k} + U_{i,j,k}}\).
 
+### Splines
+
+Depending on the data generating process, you may want to use a more flexible functional form for modeling the mean over a variable rather than 
+Examples would include age or time variables. We recommend only putting splines on the mean parameter.
+
+To model the relationship in the mean function over a specific variable, we use B-splines. You may use as many
+B-splines as you want, but keep in mind that they are all 1-dimensional splines per variable rather than an N-dimensional spline surface over the combinations of your variables.
+
 ### Offsets
 
 Count data frequently arises from populations of varying sizes. For example, a count of deaths of 10 in a population of 100 represents a higher death rate than a 10 deaths in a population of 10,000. Therefore, when you have a model that you have parametrized such that some parameter affects the *mean* number of deaths, you will want to offset that mean by the population size.
