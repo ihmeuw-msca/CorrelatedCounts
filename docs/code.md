@@ -13,11 +13,24 @@ The function that you can use to initialize a model is `ccount.run.convert_df_to
 - `outcome_variables`: `(List[str])` A list of the names of the outcome variables.
 - `fixed_effects`: `(List[List[List[str] or None]])` Nested lists of the names of fixed effects to put on each of the parameters and outcomes. See [here](models.md#parametrization) for details. If you do **not** want to put any covariates on a parameter-outcome combination, pass `None` instead of `List[str]`. *Note: Intercepts are automatically added for each parameter-outcome. Do not add another intercept.*
 - `random_effect`: `(str)` Name of the variable that specifies the grouping of the random effect.
+- `spline`: `(List[List[List[dict] or None]])` Nested lists of dictionaries that gives the spline specification
 - `offset`: `List[str]` (optional) List of variable names to use as an offset for each parameter. Must be of the length of the number of parameters in each model, **and in the correct order**. See [here](models.md#choices) for the number and order of parameters for each model type. To include an offset on only one parameter, pass a list of the variable name and `None`, in the correct order corresponding to your model type.
 - `weight`: `(str)` (optional) Name of the variable that specifies the weight to place on each observation.
 - `**kwargs`: Additional arguments
     + `normalize_X`: `(bool)` Whether or not to scale the covariates by their mean and standard deviation. By default, `normalize_X = True`. The resulting parameters are transformed after fitting so that they can be interpreted in the original space as the covariates.
     + `add_intercepts`: `(bool)` Whether or not to add intercepts for all parameter-outcomes. By default, `add_intercepts = True`.
+
+#### Spline Specification
+
+Fitting a spline requires additional information. For each spline that you want to add, you pass a dictionary rather than a string (like you do for fixed effects).
+The dictionary must have the following keys:
+
+- `name`: `(str)` variable name in your dataset for the spline
+- `knots_type`: `(str)` one of `"frequency"` (put the knots at equal quantiles of the data) or `"domain"` (put the knots at equal spacings over the domain of the variable)
+- `knots_num`: `(int)` number of knots for the spline
+- `degree`: `(int)` degree of differentiation for the spline (e.g. degree of 3 is a cubic spline, most common for this application)
+- `r_linear`: `(bool)` enforce linear function (rather than a potentially degree > 1 spline) at the tails of your data on the *right*
+- `l_linear`: `(bool)` enforce linear function (rather than a potentially degree > 1 spline) at the tails of your data on the *left*
 
 ### Example Specification
 
@@ -32,6 +45,23 @@ Consider a pandas data frame, `df`, that has the following columns: `deaths`, `c
 - median income as a predictor for the mean of deaths
 - age as a predictor for the mean of cases
 - no predictors for the probability of a structural zero
+
+*Splines*
+- a spline over calendar year with 3 degrees of freedom (cubic), and 3 knots (two at the min and max of the variable, one at the median), no linearity in tails
+- only applied to the mean, but applied to both cases and deaths
+
+Let's specify the spline here, and in the example we will apply the spline specification to the mean function for both outcomes.
+
+```
+spline_specs = {
+    'name': 'year',
+    'knots_type': 'frequency',
+    'knots_num': 3,
+    'degree': 3,
+    'r_linear': False,
+    'l_linear': False
+}
+```
 
 *Random Effect*
 
@@ -50,7 +80,10 @@ model = convert_df_to_model(
     outcome_variables=['deaths', 'cases'],
     fixed_effects=[[None, None], [['median_income'], ['age']]],
     random_effect='country',
-    offset=[None, 'population']
+    offset=[None, 'population'],
+    spline=[[None, None],
+        [[spline_specs], [spline_specs]]
+    ]
 )
 ```
 
@@ -61,18 +94,24 @@ Once you have the model object, returned by the function `model = convert_df_to_
 From our example above, to fit the model, we simply run:
 
 ```
-model.optimize_params(max_iters=10)
+model.optimize_params(max_iters=100, max_beta_iters=10, max_U_iters=10, rel_tol=1e-4)
 ```
 
-You may pass in any integer for `max_iters`. A sensible range for the optimization routine implemented in this package is between 5-10 iterations.
+The parameters that are being optimized are the fixed effects and random effects. The optimization happens iteratively,
+and you may not need to completely optimize the fixed and random effects in each overall iteration. To control this process, you 
+may pass in any integer for `max_iters`, `max_beta_iters`, and `max_U_iters`. You can also
+include a relative tolerance for the total error in the fixed and random effects with the argument `rel_tol`, and the 
+program will terminate if it reaches `rel_tol` before completing `max_iters` iterations. We recommend the defaults above for all
+of these arguments.
 
 The parameter estimates, including the \(\beta\) fixed effects, the \(U\) random effects, and the correlation between the outcomes given by \(D\) (each described in [methods](methods.md)) are all available in the `summarize` class method for `ccount.core.CorrelatedModel`. In our example above, to get a printed summary of the estimates (both transformed and un-transformed based on the link functions described in [the model choices](models.md#choices)), run the following:
 
 ```
-model.summarize()
+model.summarize(file=...)
 ```
 
 If you want to save the model summary to a file so that you can access it later, pass `file=...` and it will re-route the output to whatever file name (must have a `.txt` extension) that you pass.
+If you do not pass a file, i.e. `file=None`, then it will return the summary in your session.
 
 ## [Creating Predictions](#predictions)
 
