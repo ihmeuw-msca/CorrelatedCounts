@@ -86,21 +86,11 @@ def convert_df_to_model(model_type, df, outcome_variables,
         for f in fixed_effects
     ]
     if spline is not None:
-        S = [[
-                np.concatenate([
-                    spline_design_mat(
-                        array=np.asarray(df[g['name']]),
-                        knots_type=g['knots_type'],
-                        knots_num=g['knots_num'],
-                        degree=g['degree'],
-                        l_linear=g['l_linear'],
-                        r_linear=g['r_linear']
-                    ) for g in g_dict
-                ], axis=1) if g_dict is not None else None for g_dict in s
-            ] for s in spline
-        ]
-    else:
-        S = None
+        for s in spline:
+            for g_dict in s:
+                if g_dict is not None:
+                    for g in g_dict:
+                        g.update({'spline_var': np.asarray(df[g['name']])})
 
     Y = np.asarray(df[outcome_variables])
 
@@ -120,7 +110,7 @@ def convert_df_to_model(model_type, df, outcome_variables,
         m=Y.shape[0],
         n=Y.shape[1],
         d=d,
-        Y=Y, X=X, S=S, group_id=group_id,
+        Y=Y, X=X, spline_specs=spline, group_id=group_id,
         offset=offsets,
         weights=weight,
         **kwargs
@@ -154,21 +144,11 @@ def get_predictions_from_df(model, df,
         for f in fixed_effects
     ]
     if spline is not None:
-        S = [[
-                np.concatenate([
-                    spline_design_mat(
-                        array=np.asarray(df[g['name']]),
-                        knots_type=g['knots_type'],
-                        knots_num=g['knots_num'],
-                        degree=g['degree'],
-                        l_linear=g['l_linear'],
-                        r_linear=g['r_linear']
-                    ) for g in g_dict
-                ], axis=1) if g_dict is not None else None for g_dict in s
-            ] for s in spline
-        ]
-    else:
-        S = None
+        for s in spline:
+            for g_dict in s:
+                if g_dict is not None:
+                    for g in g_dict:
+                        g.update({'spline_var': np.asarray(df[g['name']])})
 
     if offset is not None:
         offsets = [np.asarray(df[[o]]) if o is not None else None for o in offset]
@@ -178,7 +158,7 @@ def get_predictions_from_df(model, df,
     return np.transpose(
         model.predict(
             X=X, m=len(df),
-            S=S,
+            spline_specs=spline,
             group_id=group_id,
             offset=offsets
         )

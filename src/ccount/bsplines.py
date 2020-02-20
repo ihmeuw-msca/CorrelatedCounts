@@ -29,4 +29,4 @@ def spline_design_mat(array, knots_type='frequency', knots_num=3,
         l_linear=l_linear,
         r_linear=r_linear
     )
-    return xs.design_mat(array)[:, 1:]
+    return xs

@@ -11,6 +11,7 @@ from copy import deepcopy
 
 from ccount import optimization
 from ccount import utils
+from ccount.bsplines import spline_design_mat
 
 LOG = logging.getLogger(__name__)
 
@@ -51,7 +52,7 @@ class CorrelatedModel:
     """
 
     def __init__(self, m, n, l, d, Y, X, g, f,
-                 S=None, group_id=None, offset=None, weights=None, add_intercepts=False, normalize_X=True):
+                 spline_specs=None, group_id=None, offset=None, weights=None, add_intercepts=False, normalize_X=True):
         """Correlated Model initialization method.
 
         Parameters
@@ -69,7 +70,7 @@ class CorrelatedModel:
         X : :obj: `list` of :obj: `list` of :obj: `numpy.ndarray`
             List of list of 2D arrays, storing the covariates for each parameter
             and outcome. (no intercept -- intercept automatically added)
-        S : :obj: `list` of :obj: `list` of :obj: `numpy.array`
+        spline_specs : :obj: `list` of :obj: `list` of :obj: `list` of `dict`
             List of list of arrays, storing the design matrix for a covariate to put a b-spline on for each parameter
             and outcome.
         g : :obj: `list` of :obj: `function`
@@ -126,6 +127,30 @@ class CorrelatedModel:
 
         # use this later to grab only the covariate indices that were not on splines
         self.cs = [[list(range(k.shape[1])) if k is not None else list() for k in j] for j in X]
+
+        # create the spline specifications
+        if spline_specs is not None:
+            self.xs = [[[
+                spline_design_mat(
+                    array=g['spline_var'],
+                    knots_type=g['knots_type'],
+                    knots_num=g['knots_num'],
+                    degree=g['degree'],
+                    l_linear=g['l_linear'],
+                    r_linear=g['r_linear']
+                ) for g in g_dict] if g_dict is not None else None for g_dict in s] for s in spline_specs]
+        else:
+            self.xs = None
+
+        # create splines
+        if spline_specs is not None:
+            S = [[
+                np.concatenate([
+                    self.xs[k][j][i].design_mat(g['spline_var'])[:, 1:] for i, g in enumerate(g_dict)
+                ], axis=1) if g_dict is not None else None for j, g_dict in enumerate(s)]
+                for k, s in enumerate(spline_specs)]
+        else:
+            S = None
 
         # add on an intercept for each parameter
         # and set the index of the first covariate
@@ -564,7 +589,7 @@ class CorrelatedModel:
                            "function for a model. Make sure you are not using this class directly. Subclass it"
                            "and over-write this method in your subclass.")
 
-    def predict(self, X, m, S=None, group_id=None, offset=None):
+    def predict(self, X, m, spline_specs, group_id=None, offset=None):
         """
         Predict the outcome matrix given a new X matrix and optional group IDs. If the group IDs
         don't fit the group IDs used to fit the model, then no random effects will be added on.
@@ -574,7 +599,7 @@ class CorrelatedModel:
                 and outcome (or None instead of array if no covariates)
             m: int
                 Number of observations
-            S: :obj: `list` of :obj: `list` of :obj: `np.array`
+            spline_specs: :obj: `list` of :obj: `list` of :obj: `list` of `dict`
             group_id: :obj: `numpy.ndarray`, optional
                 Optional integer group id, gives the way of grouping the random
                 effects. When it is not `None`, it should have length `m`.
@@ -583,6 +608,15 @@ class CorrelatedModel:
         if self.add_intercepts:
             LOG.info("Adding an intercept because it was added in the original model."
                      "If this is incorrect, please take away the existing intercept, or fit a new model.")
+        if spline_specs is not None:
+            S = [[
+                np.concatenate([
+                    self.xs[k][j][i].design_mat(g['spline_var'])[:, 1:] for i, g in enumerate(g_dict)
+                ], axis=1) if g_dict is not None else None for j, g_dict in enumerate(s)]
+                for k, s in enumerate(spline_specs)]
+        else:
+            S = None
+
         X = self.intercept_X(X=X, m=m)
         if S is not None:
             X = [[np.concatenate([x, s], axis=1) if s is not None else x for x, s in zip(x_outcome, s_outcome)]
