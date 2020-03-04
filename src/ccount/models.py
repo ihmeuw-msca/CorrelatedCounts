@@ -189,5 +189,6 @@ MODEL_DICT = {
     'hurdle_poisson_relu': HurdlePoissonSmoothReLU,
     'negative_binomial': NegativeBinomial,
     'zero_inflated_poisson': ZeroInflatedPoisson,
-    'zero_inflated_poisson_relu': ZeroInflatedPoissonSmoothReLU
+    'zero_inflated_poisson_relu': ZeroInflatedPoissonSmoothReLU,
+    'logistic': Logistic
 }
