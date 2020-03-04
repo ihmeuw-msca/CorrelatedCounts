@@ -198,6 +198,7 @@ class CorrelatedModel:
 
         self.Y = self.Y[sort_id]
         self.X = self.sort_X(X=self.X, sort_id=sort_id)
+        self.W = self.W[sort_id]
 
         self.unique_group_id, self.group_sizes = np.unique(self.group_id,
                                                            return_counts=True)
