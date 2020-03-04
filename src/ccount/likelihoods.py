@@ -105,3 +105,26 @@ class NegLogLikelihoods:
         )
 
         return -ll
+
+    @staticmethod
+    def logistic(Y, P):
+        """
+        Logistic regression likelihood where data are 0's and 1's.
+        For aggregated data, this function can still be used because
+        the likelihood will be multiplied by the total number of 0's or 1's
+        in each row of data.
+
+        Args:
+            Y: observed data -- should only be 1's and 0's
+            P: list with the following elements:
+                0: probability of the outcome Y == 1
+        """
+        assert P.shape[0] == 1
+        p = P[0]
+        assert ((Y == 1) | (Y == 0)).all()
+
+        ll = (
+                (Y == 1) * np.log(p) + (Y == 0) * np.log(1 - p)
+        )
+
+        return -ll
