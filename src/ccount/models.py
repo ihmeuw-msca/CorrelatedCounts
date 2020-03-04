@@ -164,13 +164,13 @@ class Logistic(CorrelatedModel):
     A logistic regression model.
     """
     def __init__(self, m, n, d, Y, X, spline_specs=None, group_id=None, weights=None,
-                 add_intercepts=True, normalize_X=True):
+                 add_intercepts=True, normalize_X=True, offset=None):
         LOG.info("Initializing a logistic regression model.")
         assert len(d) == 1
         assert len(X) == 1
         super().__init__(
             m=m, n=n, d=d, Y=Y.astype(np.number), X=X, spline_specs=spline_specs, group_id=group_id,
-            add_intercepts=add_intercepts, normalize_X=normalize_X, weights=weights,
+            add_intercepts=add_intercepts, normalize_X=normalize_X, weights=weights, offset=offset,
             l=1, g=[expit],
             f=NegLogLikelihoods.logistic
         )
