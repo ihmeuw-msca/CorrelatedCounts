@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='ccount',
-    version='0.0.0',
+    version='0.0.1',
     description='modeling correlated counts, follows model in Rodrigues-Motta et al 2013',
     url='https://github.com/mbannick/CorrelatedCounts',
     author='Marlena Bannick, Peng Zheng',
