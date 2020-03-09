@@ -159,7 +159,10 @@ class OptimizationInterface:
         """Compute the sample covariance of the random effects.
         """
         LOG.info("Computing D.")
-        D = np.array([np.cov(self.cm.U[k].T) for k in range(self.cm.l)])
+        if self.cm.n == 1:
+            D = np.array([[[np.cov(self.cm.U[k].T)]] for k in range(self.cm.l)])
+        else:
+            D = np.array([np.cov(self.cm.U[k].T) for k in range(self.cm.l)])
         self.cm.update_params(D=D)
 
     def callback_beta(self, X):
