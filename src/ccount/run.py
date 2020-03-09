@@ -102,7 +102,7 @@ def convert_df_to_model(model_type, df, outcome_variables,
         offsets = offset
 
     if weight is not None:
-        weight = np.asarray(df[[weight]])
+        weight = np.asarray(df[[weight for i in range(Y.shape[1])]])
     d = np.array([[x.shape[1] if x is not None else 0 for x in k] for k in X])
 
     return initialize_model(
