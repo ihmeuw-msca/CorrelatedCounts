@@ -436,7 +436,11 @@
 <ul>
 <li><strong>Parameter 1</strong>: probability of the outcome</li>
 </ul>
-<p>To fit this model, use <code>model_type = "logistic"</code>, which will use the inverse logit function for the probability of the outcome.</p>
+<p>To fit this model, use <code>model_type = "logistic"</code>, which will use the inverse logit function for the probability of the outcome.
+The logistic model is different than the count models because it expects either 0 or 1 as the outcome variable. It will give an error otherwise.
+If you would rather input counts from some population size, the outcome variable must still be 0 or 1, but you can pass another column
+for <code>weight</code> that is the total number of 0 or 1 in that data row. For example, if you have a categorical variable as your predictor, you
+could aggregate your data: create a new column in a <code>pandas.DataFrame.groupby</code> that is the sum of the total number of 0 and 1 in each category, and pass that total number as <code>weight</code>.</p>
                 
                   
                 

@@ -382,6 +382,8 @@ The <script type="math/tex">U_{i,j}</script>'s are correlated with one another, 
 f(Y_{i,j}|X_{i,j,k}, \beta_{j,k}, U_{i,j,k}) \quad k = 1, ..., l
 </script>
 where the covariates <script type="math/tex">X</script> and random effects <script type="math/tex">U</script> can differ with respect to each of the <script type="math/tex">l</script> parameters of the discrete distribution (e.g. the mean and the over-dispersion parameter for the variance in the Negative Binomial distribution). Depending on the support for the parameter, we may need to transform the linear combination of <script type="math/tex">X_{i,j,k} \beta_{j,k} + U_{i,j,k}</script> into the space that makes sense for the parameter and distribution at hand. For example, the mean of the Poisson distribution must be <script type="math/tex">>0</script>, so a natural <em>link function</em> that does this transformation is <script type="math/tex">e^{X_{i,j,k} \beta_{j,k} + U_{i,j,k}}</script>.</p>
+<p>We have extended these methods to take binary outcomes in a <a href="../models/#logistic-model">logistic regression model</a>.
+In this case, the count outcome is assumed to be 0 or 1.</p>
 <h3 id="splines">Splines</h3>
 <p>Depending on the data generating process, you may want to use a more flexible functional form for modeling the mean over a variable rather than 
 Examples would include age or time variables. We recommend only putting splines on the mean parameter.</p>
