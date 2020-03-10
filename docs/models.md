@@ -59,3 +59,7 @@ The Logistic model fits a logistic regression model.
 - **Parameter 1**: probability of the outcome
 
 To fit this model, use `model_type = "logistic"`, which will use the inverse logit function for the probability of the outcome.
+The logistic model is different than the count models because it expects either 0 or 1 as the outcome variable. It will give an error otherwise.
+If you would rather input counts from some population size, the outcome variable must still be 0 or 1, but you can pass another column
+for `weight` that is the total number of 0 or 1 in that data row. For example, if you have a categorical variable as your predictor, you
+could aggregate your data: create a new column in a `pandas.DataFrame.groupby` that is the sum of the total number of 0 and 1 in each category, and pass that total number as `weight`.

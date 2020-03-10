@@ -22,6 +22,9 @@ f(Y_{i,j}|X_{i,j,k}, \beta_{j,k}, U_{i,j,k}) \quad k = 1, ..., l
 $$
 where the covariates \(X\) and random effects \(U\) can differ with respect to each of the \(l\) parameters of the discrete distribution (e.g. the mean and the over-dispersion parameter for the variance in the Negative Binomial distribution). Depending on the support for the parameter, we may need to transform the linear combination of \(X_{i,j,k} \beta_{j,k} + U_{i,j,k}\) into the space that makes sense for the parameter and distribution at hand. For example, the mean of the Poisson distribution must be \(>0\), so a natural *link function* that does this transformation is \(e^{X_{i,j,k} \beta_{j,k} + U_{i,j,k}}\).
 
+We have extended these methods to take binary outcomes in a [logistic regression model](models.md#logistic-model).
+In this case, the count outcome is assumed to be 0 or 1.
+
 ### Splines
 
 Depending on the data generating process, you may want to use a more flexible functional form for modeling the mean over a variable rather than 
