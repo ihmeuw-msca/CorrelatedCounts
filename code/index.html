@@ -376,19 +376,19 @@
               
                 
                 
-                <h1 id="running-a-model"><a href="#running">Running a Model</a></h1>
-<p>The core model is an object called <code>ccount.core.CorrelatedModel</code>. Each of the types of models you can fit are explained in the <a href="../models/">models</a> documetation.</p>
-<h2 id="specifying-the-model"><a href="#specification">Specifying the Model</a></h2>
-<p>To specify a model, make sure that all variables that you need are contained within one data frame, including covariates, random effects, offsets, and weights. The outcome variables should be wide, but all other variables should be long, e.g. have one column for deaths and another column for cases, rather than one column with deaths and cases stacked on top of each other. All of these variables need to be filled in for every entry (i.e. there can be no missing values -- if you want to predict for somewhere with missing outcome information, you can do that later with the <a href="./#predictions">function</a> that makes predictions).</p>
+                <h1 id="running-a-model">Running a Model</h1>
+<p>The core model is an object called <code>ccount.core.CorrelatedModel</code>. Each of the types of models you can fit are explained in the <a href="../models/">models</a> documentation.</p>
+<h2 id="specifying-the-model">Specifying the Model</h2>
+<p>To specify a model, make sure that all variables that you need are contained within one data frame, including covariates, random effects, offsets, and weights. The outcome variables should be wide, but all other variables should be long, e.g. have one column for deaths and another column for cases, rather than one column with deaths and cases stacked on top of each other. All of these variables need to be filled in for every entry (i.e. there can be no missing values -- if you want to predict for somewhere with missing outcome information, you can do that later with the <a href="#creating-predictions">function</a> that makes predictions).</p>
 <p>The function that you can use to initialize a model is <code>ccount.run.convert_df_to_model</code>. This function returns a <code>CorrelatedModel</code> object. It takes the following arguments:</p>
 <ul>
 <li><code>model_type</code>: <code>(str)</code> The name of the model type to be fit. The list of names are in <a href="../models/">models</a>.</li>
 <li><code>df</code>: <code>(pd.DataFrame)</code> A data frame that contains all of your variables.</li>
 <li><code>outcome_variables</code>: <code>(List[str])</code> A list of the names of the outcome variables.</li>
-<li><code>fixed_effects</code>: <code>(List[List[List[str] or None]])</code> Nested lists of the names of fixed effects to put on each of the parameters and outcomes. See <a href="../models/#parametrization">here</a> for details. If you do <strong>not</strong> want to put any covariates on a parameter-outcome combination, pass <code>None</code> instead of <code>List[str]</code>. <em>Note: Intercepts are automatically added for each parameter-outcome. Do not add another intercept.</em></li>
+<li><code>fixed_effects</code>: <code>(List[List[List[str] or None]])</code> Nested lists of the names of fixed effects to put on each of the parameters and outcomes. See <a href="../models/#parametrizing-a-model">here</a> for details. If you do <strong>not</strong> want to put any covariates on a parameter-outcome combination, pass <code>None</code> instead of <code>List[str]</code>. <em>Note: Intercepts are automatically added for each parameter-outcome. Do not add another intercept.</em></li>
 <li><code>random_effect</code>: <code>(str)</code> Name of the variable that specifies the grouping of the random effect.</li>
 <li><code>spline</code>: <code>(List[List[List[dict] or None]])</code> Nested lists of dictionaries that gives the spline specification</li>
-<li><code>offset</code>: <code>List[str]</code> (optional) List of variable names to use as an offset for each parameter. Must be of the length of the number of parameters in each model, <strong>and in the correct order</strong>. See <a href="../models/#choices">here</a> for the number and order of parameters for each model type. To include an offset on only one parameter, pass a list of the variable name and <code>None</code>, in the correct order corresponding to your model type.</li>
+<li><code>offset</code>: <code>List[str]</code> (optional) List of variable names to use as an offset for each parameter. Must be of the length of the number of parameters in each model, <strong>and in the correct order</strong>. See <a href="../models/#model-choices">here</a> for the number and order of parameters for each model type. To include an offset on only one parameter, pass a list of the variable name and <code>None</code>, in the correct order corresponding to your model type.</li>
 <li><code>weight</code>: <code>(str)</code> (optional) Name of the variable that specifies the weight to place on each observation.</li>
 <li><code>**kwargs</code>: Additional arguments<ul>
 <li><code>normalize_X</code>: <code>(bool)</code> Whether or not to scale the covariates by their mean and standard deviation. By default, <code>normalize_X = True</code>. The resulting parameters are transformed after fitting so that they can be interpreted in the original space as the covariates.</li>
@@ -408,7 +408,7 @@ The dictionary must have the following keys:</p>
 <li><code>l_linear</code>: <code>(bool)</code> enforce linear function (rather than a potentially degree &gt; 1 spline) at the tails of your data on the <em>left</em></li>
 </ul>
 <h3 id="example-specification">Example Specification</h3>
-<p>Consider a pandas data frame, <code>df</code>, that has the following columns: <code>deaths</code>, <code>cases</code>, <code>median_income</code>, <code>population</code>, <code>country</code>, <code>age</code>. In my example below, I will fit a Zero-Inflated Poisson model (described <a href="../models/#zip">here</a>) with the following:</p>
+<p>Consider a pandas data frame, <code>df</code>, that has the following columns: <code>deaths</code>, <code>cases</code>, <code>median_income</code>, <code>population</code>, <code>country</code>, <code>age</code>. In my example below, I will fit a Zero-Inflated Poisson model (described <a href="../models/#zero-inflated-poisson-model">here</a>) with the following:</p>
 <p><em>Outcomes</em></p>
 <ul>
 <li>predict both deaths due to and cases of a disease, where deaths and cases are correlated with one another (2-dimensional outcome)</li>
@@ -458,7 +458,7 @@ The dictionary must have the following keys:</p>
 </pre></div>
 
 
-<h2 id="fitting-the-model"><a href="#optimization">Fitting the Model</a></h2>
+<h2 id="fitting-the-model">Fitting the Model</h2>
 <p>Once you have the model object, returned by the function <code>model = convert_df_to_model(...)</code>, we can estimate the parameters. The class method <code>ccount.core.CorrelatedModel.optimize_params</code> does the optimization work.</p>
 <p>From our example above, to fit the model, we simply run:</p>
 <div class="codehilite"><pre><span></span><span class="n">model</span><span class="p">.</span><span class="n">optimize_params</span><span class="p">(</span><span class="n">max_iters</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">max_beta_iters</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">max_U_iters</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">rel_tol</span><span class="o">=</span><span class="mi">1</span><span class="n">e</span><span class="o">-</span><span class="mi">4</span><span class="p">)</span>
@@ -471,14 +471,14 @@ may pass in any integer for <code>max_iters</code>, <code>max_beta_iters</code>,
 include a relative tolerance for the total error in the fixed and random effects with the argument <code>rel_tol</code>, and the 
 program will terminate if it reaches <code>rel_tol</code> before completing <code>max_iters</code> iterations. We recommend the defaults above for all
 of these arguments.</p>
-<p>The parameter estimates, including the <script type="math/tex">\beta</script> fixed effects, the <script type="math/tex">U</script> random effects, and the correlation between the outcomes given by <script type="math/tex">D</script> (each described in <a href="../methods/">methods</a>) are all available in the <code>summarize</code> class method for <code>ccount.core.CorrelatedModel</code>. In our example above, to get a printed summary of the estimates (both transformed and un-transformed based on the link functions described in <a href="../models/#choices">the model choices</a>), run the following:</p>
+<p>The parameter estimates, including the <script type="math/tex">\beta</script> fixed effects, the <script type="math/tex">U</script> random effects, and the correlation between the outcomes given by <script type="math/tex">D</script> (each described in <a href="../methods/">methods</a>) are all available in the <code>summarize</code> class method for <code>ccount.core.CorrelatedModel</code>. In our example above, to get a printed summary of the estimates (both transformed and un-transformed based on the link functions described in <a href="../models/#model-choices">the model choices</a>), run the following:</p>
 <div class="codehilite"><pre><span></span><span class="n">model</span><span class="p">.</span><span class="n">summarize</span><span class="p">(</span><span class="n">file</span><span class="o">=</span><span class="p">...)</span>
 </pre></div>
 
 
 <p>If you want to save the model summary to a file so that you can access it later, pass <code>file=...</code> and it will re-route the output to whatever file name (must have a <code>.txt</code> extension) that you pass.
 If you do not pass a file, i.e. <code>file=None</code>, then it will return the summary in your session.</p>
-<h2 id="creating-predictions"><a href="#predictions">Creating Predictions</a></h2>
+<h2 id="creating-predictions">Creating Predictions</h2>
 <p>In order to get the fitted values of deaths and cases, you can use the function <code>ccount.run.get_predictions_from_df</code>. It takes the same arguments as <code>convert_df_to_model</code>, except that in place of <code>model_type</code>, it needs a <code>ccount.core.CorrelatedModel</code> object, and it does not need the outcome variables. For our example above, this looks like</p>
 <div class="codehilite"><pre><span></span><span class="kn">from</span> <span class="nn">ccount.run</span> <span class="kn">import</span> <span class="n">get_predictions_from_df</span>
 
@@ -496,7 +496,7 @@ If you do not pass a file, i.e. <code>file=None</code>, then it will return the 
 
 
 <p><code>predictions</code> is a 2-dimensional array that is the length of the data frame <code>some_df</code> along one axis and the outcome predictions along the other (i.e. predictions for deaths and cases).</p>
-<p>The <code>fixed_effects</code>, <code>random_effect</code>, <code>offset</code> (if applicable), and <code>weight</code> (if applicable) arguments must be identical to those used in the initial model <a href="./#specification">specification</a>.</p>
+<p>The <code>fixed_effects</code>, <code>random_effect</code>, <code>offset</code> (if applicable), and <code>weight</code> (if applicable) arguments must be identical to those used in the initial model <a href="#specifying-the-model">specification</a>.</p>
 <p><em>Note that the data frame passed to <code>get_predictions_from_df</code> need not be the data frame that was used in model fitting.</em> It can be a new data frame with missing outcome variables because they are not used in making predictions since the model has already been fit. However, this new data frame cannot have any missing values for random effects, fixed effects, or offsets. If it includes random effect grouping levels that were not observed in the fitting of the model, the random effect will be 0 for that level.</p>
                 
                   

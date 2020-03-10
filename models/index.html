@@ -258,6 +258,13 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#logistic-model" class="md-nav__link">
+    Logistic Model
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -354,6 +361,13 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#logistic-model" class="md-nav__link">
+    Logistic Model
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -377,7 +391,7 @@
                 
                 
                 <h1 id="available-models">Available Models</h1>
-<h2 id="parametrizing-a-model"><a href="#parametrization">Parametrizing a Model</a></h2>
+<h2 id="parametrizing-a-model">Parametrizing a Model</h2>
 <p>Each of the available models is described below. They have different functional forms and therefore different parameters, and possibly different link functions for those parameters.</p>
 <p>The function to run a model is <code>ccount.run.df_to_model</code>, and requires the argument <code>model_type</code>. You determine the order of the <em>outcomes</em> by the order of the elements of the list of variable names that you pass as the <code>outcomes</code> argument, but you do not determine the order of the parameters in the model (that is explained below).</p>
 <p>The fixed effects <script type="math/tex">\beta</script> are allowed to differ across the <script type="math/tex">n</script> outcomes and <script type="math/tex">l</script> parameters. The order in which you indicate the <code>fixed_effects</code> argument matters, and that order is described below. For example, for <script type="math/tex">n=2</script> and <script type="math/tex">l=2</script>,</p>
@@ -395,28 +409,34 @@
 
 
 <p>will add <code>'covariate_1'</code> as a covariate for the first parameter on both outcomes, add <code>'covariate_2'</code> as the only covariate for the second parameter and second outcome, and add both <code>'covariate_1'</code> and <code>'covariate_2'</code> as covariates for the second parameter and first outcome.</p>
-<h2 id="model-choices"><a href="#choices">Model Choices</a></h2>
-<h3 id="zero-inflated-poisson-model"><a href="#zip">Zero-Inflated Poisson Model</a></h3>
+<h2 id="model-choices">Model Choices</h2>
+<h3 id="zero-inflated-poisson-model">Zero-Inflated Poisson Model</h3>
 <p>The Zero-Inflated Poisson model (ZIP) has a Poisson distribution, with a binomial distribution that determines that probability of the Poisson random variable realization being masked by an additional zero. Zeros can arise from the Poisson distribution <em>or</em> the Binomial distribution.</p>
 <ul>
 <li><strong>Parameter 1</strong>: probability of a structural zero (coming from the Binomial distribution)</li>
 <li><strong>Parameter 2</strong>: mean of the Poisson distribution</li>
 </ul>
 <p>To fit this model, use <code>model_type = "zero_inflated_poisson"</code>, which will use an exponential link function for the mean and the inverse logit function for the probability of a structural zero. Alternatively, you can use <code>model_type = "zero_inflated_poisson_relu"</code>, which will use a modified link function for the mean that is more stable for large values.</p>
-<h3 id="poisson-hurdle-model"><a href="#hurdle-poisson">Poisson Hurdle Model</a></h3>
+<h3 id="poisson-hurdle-model">Poisson Hurdle Model</h3>
 <p>The Poisson hurdle model has a Poisson distribution that has been truncated at 0, and re-normalized for its new support, and a binomial model for the probability of a 0. In this model, zeros can only arise from the Binomial distribution.</p>
 <ul>
 <li><strong>Parameter 1</strong>: probability of a zero</li>
 <li><strong>Parameter 2</strong>: mean of the Poisson <em>before</em> truncation</li>
 </ul>
-<p>To fit this model, use <code>model_type = "hurdle_poisson"</code>, which will use an exponential link function for the mean and the inverse logit function for the probability of a structural zero. Alternatively, you can use <code>model_type = "hurdle_poisson_relu"</code>, which will use a modified link function for the mean that is more stable for large values.</p>
-<h3 id="negative-binomial"><a href="#neg-binom">Negative Binomial</a></h3>
+<p>To fit this model, use <code>model_type = "hurdle_poisson"</code>, which will use an exponential link function for the mean and the inverse logit function for the probability of a structural zero. Alternatively, you can use <code>model_type = "hurdle_poisson_relu"</code>, which will use a modified link function for the mean that is more stable for large values (if you haven't already scaled your covariates).</p>
+<h3 id="negative-binomial">Negative Binomial</h3>
 <p>The Negative Binomial model is an extension of the Poisson model that allows for over-dispersion (since in the Poisson distribution the mean = variance).</p>
 <ul>
 <li><strong>Parameter 1</strong>: mean of the distribution</li>
 <li><strong>Parameter 2</strong>: over-dispersion parameter (large values means variance &gt;&gt; mean)</li>
 </ul>
 <p>To fit this model, use <code>model_type = "negative_binomial"</code>, which will use an exponential link function for the mean and the over-dispersion parameter.</p>
+<h3 id="logistic-model">Logistic Model</h3>
+<p>The Logistic model fits a logistic regression model.</p>
+<ul>
+<li><strong>Parameter 1</strong>: probability of the outcome</li>
+</ul>
+<p>To fit this model, use <code>model_type = "logistic"</code>, which will use the inverse logit function for the probability of the outcome.</p>
                 
                   
                 
