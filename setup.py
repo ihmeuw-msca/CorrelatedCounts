@@ -10,6 +10,6 @@ setup(
     license='MIT',
     packages=['ccount'],
     package_dir={"": "src"},
-    install_requires=['numpy', 'pytest', 'scipy', 'xspline'],
+    install_requires=['numpy', 'pytest', 'scipy', 'xspline', 'pandas'],
     zip_safe=False
 )
