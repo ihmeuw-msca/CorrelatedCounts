@@ -198,6 +198,7 @@ class ModelRun:
         self.bootstraps = bootstraps
 
         self.model = None
+        self.draws = None
         self.models = list()
 
         self.initialize()
@@ -232,14 +233,19 @@ class ModelRun:
         """
         assert 0 < alpha < 1
         predictions = self.predictions(model=self.model)
-        draws = np.vstack([
-            self.predictions(model=mod) for mod in self.models
-        ])
-        return pd.DataFrame({
-            'mean': predictions[0],
-            'lower': np.quantile(draws, q=alpha/2, axis=0),
-            'upper': np.quantile(draws, q=1-alpha/2, axis=0)
-        })
+        if len(self.models) > 0:
+            self.draws = np.vstack([
+                self.predictions(model=mod) for mod in self.models
+            ])
+            return pd.DataFrame({
+                'mean': predictions[0],
+                'lower': np.quantile(self.draws, q=alpha/2, axis=0),
+                'upper': np.quantile(self.draws, q=1-alpha/2, axis=0)
+            })
+        else:
+            return pd.DataFrame({
+                'mean': predictions[0]
+            })
 
     def convert(self, df):
         """
