@@ -1,12 +1,18 @@
 # Running a Model
 
 The core model is an object called `ccount.core.CorrelatedModel`. Each of the types of models you can fit are explained in the [models](models.md) documentation.
+If you are new to using this code base, please read the following sections about [model specification](#specifying-the-model),
+[fitting the model](#fitting-the-model), and [creating predictions](#creating-predictions).
+
+We have recently added a `ModelRun` class that combines all of the steps in the aforementioned sections to limit the amount
+of code that you need to write. It also allows you to use the data bootstrap method to produce confidence intervals for your predictions. See [here](#easy-model-launching) for documentation.
 
 ## Specifying the Model
 
 To specify a model, make sure that all variables that you need are contained within one data frame, including covariates, random effects, offsets, and weights. The outcome variables should be wide, but all other variables should be long, e.g. have one column for deaths and another column for cases, rather than one column with deaths and cases stacked on top of each other. All of these variables need to be filled in for every entry (i.e. there can be no missing values -- if you want to predict for somewhere with missing outcome information, you can do that later with the [function](#creating-predictions) that makes predictions).
 
-The function that you can use to initialize a model is `ccount.run.convert_df_to_model`. This function returns a `CorrelatedModel` object. It takes the following arguments:
+The class that you can use to initialize a model is `ccount.run.ModelRun`.
+This class makes it easy to fit the model and to predict for a new data frame. It takes the following arguments:
 
 - `model_type`: `(str)` The name of the model type to be fit. The list of names are in [models](models.md).
 - `df`: `(pd.DataFrame)` A data frame that contains all of your variables.
@@ -117,23 +123,31 @@ If you do not pass a file, i.e. `file=None`, then it will return the summary in 
 
 In order to get the fitted values of deaths and cases, you can use the function `ccount.run.get_predictions_from_df`. It takes the same arguments as `convert_df_to_model`, except that in place of `model_type`, it needs a `ccount.core.CorrelatedModel` object, and it does not need the outcome variables. For our example above, this looks like
 
-```
-from ccount.run import get_predictions_from_df
-
-predictions = get_predictions_from_df(
-    model=model,
-    df=some_df,
-    fixed_effects=[[None, None], [['median_income'], ['age']]],
-    random_effect='country',
-    offset=[None, 'population'],
-    spline=[[None, None],
-        [[spline_specs], [spline_specs]]
-    ]
-)
-```
-
 `predictions` is a 2-dimensional array that is the length of the data frame `some_df` along one axis and the outcome predictions along the other (i.e. predictions for deaths and cases).
 
 The `fixed_effects`, `random_effect`, `offset` (if applicable), and `weight` (if applicable) arguments must be identical to those used in the initial model [specification](#specifying-the-model).
 
 *Note that the data frame passed to `get_predictions_from_df` need not be the data frame that was used in model fitting.* It can be a new data frame with missing outcome variables because they are not used in making predictions since the model has already been fit. However, this new data frame cannot have any missing values for random effects, fixed effects, or offsets. If it includes random effect grouping levels that were not observed in the fitting of the model, the random effect will be 0 for that level.
+
+## Easy Model Launching
+
+To run a model with less code, you can use the following class that takes all of the same arguments
+as `convert_df_to_model` (see [here](#specifying-the-model)), `optimize_params` (see [here](#fitting-the-model))
+with some exceptions:
+```
+from ccount.run import ModelRun
+
+model = ModelRun(training_df, prediction_df, bootstraps=None, **kwargs)
+```
+- `training_df`: `(pd.DataFrame)` your dataset that you want to train the model on (previously called `df` in `convert_df_to_model`)
+- `prediction_df`: `(pd.DataFrame)` your dataset that you want to make predictions for (previously called `df` in `get_predictions_from_df`)
+- **NEW**: `bootstraps`: `(optional int)` number of data bootstraps to perform for uncertainty
+- `**kwargs`: all arguments that were previously passed to `convert_df_to_model` and `optimize_params`
+
+When you initialize the `ModelRun`, it will set up your main model and then each of the models that will
+be used for the data bootstraps (see [here](methods.md#data-bootstrap) for a description of the data bootstrap method).
+To fit the model, use the function `ModelRun.run()`. To make predictions, use the function `ModelRun.predict(alpha=0.05)`, where
+`alpha` corresponds to a `1 - alpha` confidence level (e.g. 95% confidence interval). There is no need to pass
+additional arguments to the `run()` and `predict()` functions because all information about the optimization and 
+prediction data frame was passed in to the `ModelRun` `**kwargs**`.
+

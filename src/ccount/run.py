@@ -237,6 +237,7 @@ class ModelRun:
             self.draws = np.vstack([
                 self.predictions(model=mod) for mod in self.models
             ])
+            # TODO: Make this work for n > 1 outcomes -- adjust axis
             return pd.DataFrame({
                 'mean': predictions[0],
                 'lower': np.quantile(self.draws, q=alpha/2, axis=0),
@@ -312,6 +313,10 @@ class ModelRun:
                 lambda x: x.sample(len(x), replace=True)
             )
             self.models.append(self.convert(df=df_i))
+
+    def summarize(self, **kwargs):
+        self.model.summarize(**kwargs)
+
 
 
 

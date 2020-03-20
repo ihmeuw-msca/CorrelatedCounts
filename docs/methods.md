@@ -48,3 +48,9 @@ You may want to weight data points differently depending on how certain those da
 ### Optimization
 
 To estimate the parameters of this model, we add a prior for \(U\) that incorporates \(D\), and then optimize \(f(Y_{i,j}|...)\) with respect to \(\beta\), \(U\) and \(D\).
+
+### Uncertainty
+
+Right now, uncertainty in the predictions can be produced by using a data bootstrap technique.
+We re-sample the input data with replacement a fixed number of times and fit the whole model on each
+of those re-sampled datasets. The 95% confidence interval for the predictions is given by the 2.5th and 97.5th percentiles of the results.
