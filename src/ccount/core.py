@@ -196,9 +196,13 @@ class CorrelatedModel:
         for k in range(self.l):
             self.offset[k] = self.offset[k][sort_id]
 
+        # sort the data according to sort_id
         self.Y = self.Y[sort_id]
         self.X = self.sort_X(X=self.X, sort_id=sort_id)
         self.W = self.W[sort_id]
+
+        # store the entries of Y with partial missing information
+        self.missing = self.Y.isnull()
 
         self.unique_group_id, self.group_sizes = np.unique(self.group_id,
                                                            return_counts=True)
@@ -449,7 +453,8 @@ class CorrelatedModel:
                         compute_D=True,
                         rel_tol=None,
                         max_beta_iters=1e3,
-                        max_U_iters=1e3):
+                        max_U_iters=1e3,
+                        impute_partial_missing=True):
         """Optimize the parameters.
 
         Parameters
@@ -471,11 +476,17 @@ class CorrelatedModel:
         max_U_iters: int, option
             Maximum number of iterations for scipy.optimize for U, in every
             max_iters iteration
+        impute_partial_missing: bool, optional
+            Option to impute missing data as part of the EM algorithm. Will allow you to estimate
+            random effects for locations where you only had data for one outcome.
         """
         LOG.info("Optimizing the parameters.")
         for i in range(max_iters):
             LOG.info(f"On iteration {i}...")
             error = 0
+            if impute_partial_missing:
+                expectation = self.mean_outcome(P=self.P)
+                self.Y[self.missing] = expectation[self.missing]
             if optimize_beta:
                 old_beta = deepcopy(self.beta)
                 self.opt_interface.optimize_beta(maxiter=max_beta_iters)
