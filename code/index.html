@@ -1,38 +1,17 @@
 
 
 
-
 <!doctype html>
 <html lang="en" class="no-js">
   <head>
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
-      <meta http-equiv="x-ua-compatible" content="ie=edge">
       
       
-      
-      
-        <meta name="lang:clipboard.copy" content="Copy to clipboard">
-      
-        <meta name="lang:clipboard.copied" content="Copied to clipboard">
-      
-        <meta name="lang:search.language" content="en">
-      
-        <meta name="lang:search.pipeline.stopwords" content="True">
-      
-        <meta name="lang:search.pipeline.trimmer" content="True">
-      
-        <meta name="lang:search.result.none" content="No matching documents">
-      
-        <meta name="lang:search.result.one" content="1 matching document">
-      
-        <meta name="lang:search.result.other" content="# matching documents">
-      
-        <meta name="lang:search.tokenizer" content="[\s\-]+">
       
       <link rel="shortcut icon" href="../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.0.4, mkdocs-material-4.6.0">
+      <meta name="generator" content="mkdocs-1.1.2, mkdocs-material-5.3.2">
     
     
       
@@ -40,21 +19,18 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/application.1b62728e.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.fe0cca5b.min.css">
       
       
     
-    
-      <script src="../assets/javascripts/modernizr.268332fc.js"></script>
     
     
       
         <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
         <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700%7CRoboto+Mono&display=fallback">
-        <style>body,input{font-family:"Roboto","Helvetica Neue",Helvetica,Arial,sans-serif}code,kbd,pre{font-family:"Roboto Mono","Courier New",Courier,monospace}</style>
+        <style>body,input{font-family:"Roboto",-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif}code,kbd,pre{font-family:"Roboto Mono",SFMono-Regular,Consolas,Menlo,monospace}</style>
       
     
-    <link rel="stylesheet" href="../assets/fonts/material-icons.css">
     
     
       <link rel="stylesheet" href="../css/custom.css">
@@ -65,69 +41,73 @@
     
   </head>
   
+  
     <body dir="ltr">
   
-    <svg class="md-svg">
-      <defs>
-        
-        
-      </defs>
-    </svg>
+    
     <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
     <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
-    <label class="md-overlay" data-md-component="overlay" for="__drawer"></label>
-    
-      <a href="#running-a-model" tabindex="1" class="md-skip">
-        Skip to content
-      </a>
-    
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#running-a-model" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
     
       <header class="md-header" data-md-component="header">
-  <nav class="md-header-nav md-grid">
-    <div class="md-flex">
-      <div class="md-flex__cell md-flex__cell--shrink">
-        <a href=".." title="Correlated Counts" class="md-header-nav__button md-logo">
-          
-            <i class="md-icon"></i>
-          
-        </a>
-      </div>
-      <div class="md-flex__cell md-flex__cell--shrink">
-        <label class="md-icon md-icon--menu md-header-nav__button" for="__drawer"></label>
-      </div>
-      <div class="md-flex__cell md-flex__cell--stretch">
-        <div class="md-flex__ellipsis md-header-nav__title" data-md-component="title">
-          
-            <span class="md-header-nav__topic">
-              Correlated Counts
-            </span>
-            <span class="md-header-nav__topic">
-              
-                Code
-              
-            </span>
-          
+  <nav class="md-header-nav md-grid" aria-label="Header">
+    <a href=".." title="Correlated Counts" class="md-header-nav__button md-logo" aria-label="Correlated Counts">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 003-3 3 3 0 00-3-3 3 3 0 00-3 3 3 3 0 003 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54z"/></svg>
+
+    </a>
+    <label class="md-header-nav__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2z"/></svg>
+    </label>
+    <div class="md-header-nav__title" data-md-component="header-title">
+      
+        <div class="md-header-nav__ellipsis">
+          <span class="md-header-nav__topic md-ellipsis">
+            Correlated Counts
+          </span>
+          <span class="md-header-nav__topic md-ellipsis">
+            
+              Code
+            
+          </span>
         </div>
-      </div>
-      <div class="md-flex__cell md-flex__cell--shrink">
-        
-          <label class="md-icon md-icon--search md-header-nav__button" for="__search"></label>
-          
+      
+    </div>
+    
+      <label class="md-header-nav__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0116 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 019.5 16 6.5 6.5 0 013 9.5 6.5 6.5 0 019.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+      </label>
+      
 <div class="md-search" data-md-component="search" role="dialog">
   <label class="md-search__overlay" for="__search"></label>
   <div class="md-search__inner" role="search">
     <form class="md-search__form" name="search">
-      <input type="text" class="md-search__input" name="query" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="query" data-md-state="active">
-      <label class="md-icon md-search__icon" for="__search"></label>
-      <button type="reset" class="md-icon md-search__icon" data-md-component="reset" tabindex="-1">
-        &#xE5CD;
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" data-md-state="active">
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0116 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 019.5 16 6.5 6.5 0 013 9.5 6.5 6.5 0 019.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+      </label>
+      <button type="reset" class="md-search__icon md-icon" aria-label="Clear" data-md-component="search-reset" tabindex="-1">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg>
       </button>
     </form>
     <div class="md-search__output">
       <div class="md-search__scrollwrap" data-md-scrollfix>
-        <div class="md-search-result" data-md-component="result">
+        <div class="md-search-result" data-md-component="search-result">
           <div class="md-search-result__meta">
-            Type to start searching
+            Initializing search
           </div>
           <ol class="md-search-result__list"></ol>
         </div>
@@ -135,31 +115,32 @@
     </div>
   </div>
 </div>
-        
-      </div>
-      
-    </div>
+    
+    
   </nav>
 </header>
     
-    <div class="md-container">
+    <div class="md-container" data-md-component="container">
       
         
       
       
-      <main class="md-main" role="main">
-        <div class="md-main__inner md-grid" data-md-component="container">
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
           
             
               <div class="md-sidebar md-sidebar--primary" data-md-component="navigation">
                 <div class="md-sidebar__scrollwrap">
                   <div class="md-sidebar__inner">
-                    <nav class="md-nav md-nav--primary" data-md-level="0">
-  <label class="md-nav__title md-nav__title--site" for="__drawer">
-    <a href=".." title="Correlated Counts" class="md-nav__button md-logo">
+                    <nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="Correlated Counts" class="md-nav__button md-logo" aria-label="Correlated Counts">
       
-        <i class="md-icon"></i>
-      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 003-3 3 3 0 00-3-3 3 3 0 00-3 3 3 3 0 003 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54z"/></svg>
+
     </a>
     Correlated Counts
   </label>
@@ -211,13 +192,16 @@
 
   <li class="md-nav__item md-nav__item--active">
     
-    <input class="md-toggle md-nav__toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+    <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
     
       
     
     
       <label class="md-nav__link md-nav__link--active" for="__toc">
         Code
+        <span class="md-nav__icon md-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 9h14V7H3v2m0 4h14v-2H3v2m0 4h14v-2H3v2m16 0h2v-2h-2v2m0-10v2h2V7h-2m0 6h2v-2h-2v2z"/></svg>
+        </span>
       </label>
     
     <a href="./" title="Code" class="md-nav__link md-nav__link--active">
@@ -225,13 +209,18 @@
     </a>
     
       
-<nav class="md-nav md-nav--secondary">
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
   
   
     
   
   
-    <label class="md-nav__title" for="__toc">Table of contents</label>
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+      </span>
+      Table of contents
+    </label>
     <ul class="md-nav__list" data-md-scrollfix>
       
         <li class="md-nav__item">
@@ -239,7 +228,7 @@
     Specifying the Model
   </a>
   
-    <nav class="md-nav">
+    <nav class="md-nav" aria-label="Specifying the Model">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -275,9 +264,12 @@
   
 </li>
       
-      
-      
-      
+        <li class="md-nav__item">
+  <a href="#easy-model-launching" class="md-nav__link">
+    Easy Model Launching
+  </a>
+  
+</li>
       
     </ul>
   
@@ -309,13 +301,18 @@
                 <div class="md-sidebar__scrollwrap">
                   <div class="md-sidebar__inner">
                     
-<nav class="md-nav md-nav--secondary">
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
   
   
     
   
   
-    <label class="md-nav__title" for="__toc">Table of contents</label>
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+      </span>
+      Table of contents
+    </label>
     <ul class="md-nav__list" data-md-scrollfix>
       
         <li class="md-nav__item">
@@ -323,7 +320,7 @@
     Specifying the Model
   </a>
   
-    <nav class="md-nav">
+    <nav class="md-nav" aria-label="Specifying the Model">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -359,9 +356,12 @@
   
 </li>
       
-      
-      
-      
+        <li class="md-nav__item">
+  <a href="#easy-model-launching" class="md-nav__link">
+    Easy Model Launching
+  </a>
+  
+</li>
       
     </ul>
   
@@ -376,11 +376,19 @@
               
                 
                 
+                  
+                
+                
                 <h1 id="running-a-model">Running a Model</h1>
-<p>The core model is an object called <code>ccount.core.CorrelatedModel</code>. Each of the types of models you can fit are explained in the <a href="../models/">models</a> documentation.</p>
+<p>The core model is an object called <code>ccount.core.CorrelatedModel</code>. Each of the types of models you can fit are explained in the <a href="../models/">models</a> documentation.
+If you are new to using this code base, please read the following sections about <a href="#specifying-the-model">model specification</a>,
+<a href="#fitting-the-model">fitting the model</a>, and <a href="#creating-predictions">creating predictions</a>.</p>
+<p>We have recently added a <code>ModelRun</code> class that combines all of the steps in the aforementioned sections to limit the amount
+of code that you need to write. It also allows you to use the data bootstrap method to produce confidence intervals for your predictions. See <a href="#easy-model-launching">here</a> for documentation.</p>
 <h2 id="specifying-the-model">Specifying the Model</h2>
 <p>To specify a model, make sure that all variables that you need are contained within one data frame, including covariates, random effects, offsets, and weights. The outcome variables should be wide, but all other variables should be long, e.g. have one column for deaths and another column for cases, rather than one column with deaths and cases stacked on top of each other. All of these variables need to be filled in for every entry (i.e. there can be no missing values -- if you want to predict for somewhere with missing outcome information, you can do that later with the <a href="#creating-predictions">function</a> that makes predictions).</p>
-<p>The function that you can use to initialize a model is <code>ccount.run.convert_df_to_model</code>. This function returns a <code>CorrelatedModel</code> object. It takes the following arguments:</p>
+<p>The class that you can use to initialize a model is <code>ccount.run.ModelRun</code>.
+This class makes it easy to fit the model and to predict for a new data frame. It takes the following arguments:</p>
 <ul>
 <li><code>model_type</code>: <code>(str)</code> The name of the model type to be fit. The list of names are in <a href="../models/">models</a>.</li>
 <li><code>df</code>: <code>(pd.DataFrame)</code> A data frame that contains all of your variables.</li>
@@ -423,15 +431,15 @@ The dictionary must have the following keys:</p>
 - a spline over calendar year with 3 degrees of freedom (cubic), and 3 knots (two at the min and max of the variable, one at the median), no linearity in tails
 - only applied to the mean, but applied to both cases and deaths</p>
 <p>Let's specify the spline here, and in the example we will apply the spline specification to the mean function for both outcomes.</p>
-<div class="codehilite"><pre><span></span><span class="n">spline_specs</span> <span class="o">=</span> <span class="err">{</span>
-    <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="s1">&#39;year&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;knots_type&#39;</span><span class="p">:</span> <span class="s1">&#39;frequency&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;knots_num&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
-    <span class="s1">&#39;degree&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
-    <span class="s1">&#39;r_linear&#39;</span><span class="p">:</span> <span class="k">False</span><span class="p">,</span>
-    <span class="s1">&#39;l_linear&#39;</span><span class="p">:</span> <span class="k">False</span>
+<div class="codehilite"><pre><span></span><code><span class="err">spline_specs = {</span>
+<span class="err">    &#39;name&#39;: &#39;year&#39;,</span>
+<span class="err">    &#39;knots_type&#39;: &#39;frequency&#39;,</span>
+<span class="err">    &#39;knots_num&#39;: 3,</span>
+<span class="err">    &#39;degree&#39;: 3,</span>
+<span class="err">    &#39;r_linear&#39;: False,</span>
+<span class="err">    &#39;l_linear&#39;: False</span>
 <span class="err">}</span>
-</pre></div>
+</code></pre></div>
 
 
 <p><em>Random Effect</em></p>
@@ -442,7 +450,7 @@ The dictionary must have the following keys:</p>
 <ul>
 <li>population as the "offset" for the mean, or the denominator that deaths and cases came from</li>
 </ul>
-<div class="codehilite"><pre><span></span><span class="kn">from</span> <span class="nn">ccount.run</span> <span class="kn">import</span> <span class="n">convert_df_to_model</span>
+<div class="codehilite"><pre><span></span><code><span class="kn">from</span> <span class="nn">ccount.run</span> <span class="kn">import</span> <span class="n">convert_df_to_model</span>
 
 <span class="n">model</span> <span class="o">=</span> <span class="n">convert_df_to_model</span><span class="p">(</span>
     <span class="n">model_type</span><span class="o">=</span><span class="s1">&#39;zero_inflated_poisson&#39;</span><span class="p">,</span>
@@ -455,14 +463,14 @@ The dictionary must have the following keys:</p>
         <span class="p">[[</span><span class="n">spline_specs</span><span class="p">],</span> <span class="p">[</span><span class="n">spline_specs</span><span class="p">]]</span>
     <span class="p">]</span>
 <span class="p">)</span>
-</pre></div>
+</code></pre></div>
 
 
 <h2 id="fitting-the-model">Fitting the Model</h2>
 <p>Once you have the model object, returned by the function <code>model = convert_df_to_model(...)</code>, we can estimate the parameters. The class method <code>ccount.core.CorrelatedModel.optimize_params</code> does the optimization work.</p>
 <p>From our example above, to fit the model, we simply run:</p>
-<div class="codehilite"><pre><span></span><span class="n">model</span><span class="p">.</span><span class="n">optimize_params</span><span class="p">(</span><span class="n">max_iters</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">max_beta_iters</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">max_U_iters</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">rel_tol</span><span class="o">=</span><span class="mi">1</span><span class="n">e</span><span class="o">-</span><span class="mi">4</span><span class="p">)</span>
-</pre></div>
+<div class="codehilite"><pre><span></span><code><span class="err">model.optimize_params(max_iters=100, max_beta_iters=10, max_U_iters=10, rel_tol=1e-4)</span>
+</code></pre></div>
 
 
 <p>The parameters that are being optimized are the fixed effects and random effects. The optimization happens iteratively,
@@ -472,35 +480,46 @@ include a relative tolerance for the total error in the fixed and random effects
 program will terminate if it reaches <code>rel_tol</code> before completing <code>max_iters</code> iterations. We recommend the defaults above for all
 of these arguments.</p>
 <p>The parameter estimates, including the <script type="math/tex">\beta</script> fixed effects, the <script type="math/tex">U</script> random effects, and the correlation between the outcomes given by <script type="math/tex">D</script> (each described in <a href="../methods/">methods</a>) are all available in the <code>summarize</code> class method for <code>ccount.core.CorrelatedModel</code>. In our example above, to get a printed summary of the estimates (both transformed and un-transformed based on the link functions described in <a href="../models/#model-choices">the model choices</a>), run the following:</p>
-<div class="codehilite"><pre><span></span><span class="n">model</span><span class="p">.</span><span class="n">summarize</span><span class="p">(</span><span class="n">file</span><span class="o">=</span><span class="p">...)</span>
-</pre></div>
+<div class="codehilite"><pre><span></span><code><span class="err">model.summarize(file=...)</span>
+</code></pre></div>
 
 
 <p>If you want to save the model summary to a file so that you can access it later, pass <code>file=...</code> and it will re-route the output to whatever file name (must have a <code>.txt</code> extension) that you pass.
 If you do not pass a file, i.e. <code>file=None</code>, then it will return the summary in your session.</p>
 <h2 id="creating-predictions">Creating Predictions</h2>
 <p>In order to get the fitted values of deaths and cases, you can use the function <code>ccount.run.get_predictions_from_df</code>. It takes the same arguments as <code>convert_df_to_model</code>, except that in place of <code>model_type</code>, it needs a <code>ccount.core.CorrelatedModel</code> object, and it does not need the outcome variables. For our example above, this looks like</p>
-<div class="codehilite"><pre><span></span><span class="kn">from</span> <span class="nn">ccount.run</span> <span class="kn">import</span> <span class="n">get_predictions_from_df</span>
-
-<span class="n">predictions</span> <span class="o">=</span> <span class="n">get_predictions_from_df</span><span class="p">(</span>
-    <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span>
-    <span class="n">df</span><span class="o">=</span><span class="n">some_df</span><span class="p">,</span>
-    <span class="n">fixed_effects</span><span class="o">=</span><span class="p">[[</span><span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">],</span> <span class="p">[[</span><span class="s1">&#39;median_income&#39;</span><span class="p">],</span> <span class="p">[</span><span class="s1">&#39;age&#39;</span><span class="p">]]],</span>
-    <span class="n">random_effect</span><span class="o">=</span><span class="s1">&#39;country&#39;</span><span class="p">,</span>
-    <span class="n">offset</span><span class="o">=</span><span class="p">[</span><span class="bp">None</span><span class="p">,</span> <span class="s1">&#39;population&#39;</span><span class="p">],</span>
-    <span class="n">spline</span><span class="o">=</span><span class="p">[[</span><span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">],</span>
-        <span class="p">[[</span><span class="n">spline_specs</span><span class="p">],</span> <span class="p">[</span><span class="n">spline_specs</span><span class="p">]]</span>
-    <span class="p">]</span>
-<span class="p">)</span>
-</pre></div>
-
-
 <p><code>predictions</code> is a 2-dimensional array that is the length of the data frame <code>some_df</code> along one axis and the outcome predictions along the other (i.e. predictions for deaths and cases).</p>
 <p>The <code>fixed_effects</code>, <code>random_effect</code>, <code>offset</code> (if applicable), and <code>weight</code> (if applicable) arguments must be identical to those used in the initial model <a href="#specifying-the-model">specification</a>.</p>
 <p><em>Note that the data frame passed to <code>get_predictions_from_df</code> need not be the data frame that was used in model fitting.</em> It can be a new data frame with missing outcome variables because they are not used in making predictions since the model has already been fit. However, this new data frame cannot have any missing values for random effects, fixed effects, or offsets. If it includes random effect grouping levels that were not observed in the fitting of the model, the random effect will be 0 for that level.</p>
-                
-                  
-                
+<h2 id="easy-model-launching">Easy Model Launching</h2>
+<p>To run a model with less code, you can use the following class that takes all of the same arguments
+as <code>convert_df_to_model</code> (see <a href="#specifying-the-model">here</a>), <code>optimize_params</code> (see <a href="#fitting-the-model">here</a>)
+with some exceptions:</p>
+<div class="codehilite"><pre><span></span><code><span class="kn">from</span> <span class="nn">ccount.run</span> <span class="kn">import</span> <span class="n">ModelRun</span>
+
+<span class="n">model</span> <span class="o">=</span> <span class="n">ModelRun</span><span class="p">(</span><span class="n">training_df</span><span class="p">,</span> <span class="n">prediction_df</span><span class="p">,</span> <span class="n">bootstraps</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</code></pre></div>
+
+
+<ul>
+<li><code>training_df</code>: <code>(pd.DataFrame)</code> your dataset that you want to train the model on (previously called <code>df</code> in <code>convert_df_to_model</code>)</li>
+<li><code>prediction_df</code>: <code>(pd.DataFrame)</code> your dataset that you want to make predictions for (previously called <code>df</code> in <code>get_predictions_from_df</code>)</li>
+<li><strong>NEW</strong>: <code>bootstraps</code>: <code>(optional int)</code> number of data bootstraps to perform for uncertainty</li>
+<li><code>**kwargs</code>: all arguments that were previously passed to <code>convert_df_to_model</code> and <code>optimize_params</code></li>
+</ul>
+<p>When you initialize the <code>ModelRun</code>, it will set up your main model and then each of the models that will
+be used for the data bootstraps (see <a href="../methods/#data-bootstrap">here</a> for a description of the data bootstrap method).
+To fit the model, use the function <code>ModelRun.run()</code>. If you are using the boostrap functionality,
+you can fit the model for each bootstrapped dataset in parallel with multiprocessing pools
+ by passing a number of pools to <code>run</code>, like</p>
+<div class="codehilite"><pre><span></span><code><span class="err">model.run(pools=5)</span>
+</code></pre></div>
+
+
+<p>To make predictions, use the function <code>ModelRun.predict(alpha=0.05)</code>, where
+<code>alpha</code> corresponds to a <code>1 - alpha</code> confidence level (e.g. 95% confidence interval). There is no need to pass
+additional arguments to the <code>run()</code> and <code>predict()</code> functions because all information about the optimization and 
+prediction data frame was passed in to the <code>ModelRun</code> <code>**kwargs**</code>.</p>
                 
               
               
@@ -517,34 +536,34 @@ If you do not pass a file, i.e. <code>file=None</code>, then it will return the 
 <footer class="md-footer">
   
     <div class="md-footer-nav">
-      <nav class="md-footer-nav__inner md-grid">
+      <nav class="md-footer-nav__inner md-grid" aria-label="Footer">
         
-          <a href="../models/" title="Models" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
-            <div class="md-flex__cell md-flex__cell--shrink">
-              <i class="md-icon md-icon--arrow-back md-footer-nav__button"></i>
+          <a href="../models/" title="Models" class="md-footer-nav__link md-footer-nav__link--prev" rel="prev">
+            <div class="md-footer-nav__button md-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
             </div>
-            <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
-              <span class="md-flex__ellipsis">
+            <div class="md-footer-nav__title">
+              <div class="md-ellipsis">
                 <span class="md-footer-nav__direction">
                   Previous
                 </span>
                 Models
-              </span>
+              </div>
             </div>
           </a>
         
         
-          <a href="../updates/" title="Release Notes" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
-            <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
-              <span class="md-flex__ellipsis">
+          <a href="../updates/" title="Release Notes" class="md-footer-nav__link md-footer-nav__link--next" rel="next">
+            <div class="md-footer-nav__title">
+              <div class="md-ellipsis">
                 <span class="md-footer-nav__direction">
                   Next
                 </span>
                 Release Notes
-              </span>
+              </div>
             </div>
-            <div class="md-flex__cell md-flex__cell--shrink">
-              <i class="md-icon md-icon--arrow-forward md-footer-nav__button"></i>
+            <div class="md-footer-nav__button md-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4z"/></svg>
             </div>
           </a>
         
@@ -555,11 +574,10 @@ If you do not pass a file, i.e. <code>file=None</code>, then it will return the 
     <div class="md-footer-meta__inner md-grid">
       <div class="md-footer-copyright">
         
-        powered by
-        <a href="https://www.mkdocs.org">MkDocs</a>
-        and
-        <a href="https://squidfunk.github.io/mkdocs-material/">
-          Material for MkDocs</a>
+        Made with
+        <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+          Material for MkDocs
+        </a>
       </div>
       
     </div>
@@ -568,9 +586,18 @@ If you do not pass a file, i.e. <code>file=None</code>, then it will return the 
       
     </div>
     
-      <script src="../assets/javascripts/application.808e90bb.js"></script>
+      <script src="../assets/javascripts/vendor.d710d30a.min.js"></script>
+      <script src="../assets/javascripts/bundle.7f4f3c92.min.js"></script><script id="__lang" type="application/json">{"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents"}</script>
       
-      <script>app.initialize({version:"1.0.4",url:{base:".."}})</script>
+      <script>
+        app = initialize({
+          base: "..",
+          features: [],
+          search: Object.assign({
+            worker: "../assets/javascripts/worker/search.9b3611bd.min.js"
+          }, typeof search !== "undefined" && search)
+        })
+      </script>
       
         <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-MML-AM_CHTML"></script>
       
