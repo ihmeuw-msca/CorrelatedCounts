@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='ccount',
-    version='0.0.1',
+    version='0.0.2',
     description='modeling correlated counts, follows model in Rodrigues-Motta et al 2013',
     url='https://github.com/mbannick/CorrelatedCounts',
     author='Marlena Bannick, Peng Zheng',
@@ -10,6 +10,6 @@ setup(
     license='MIT',
     packages=['ccount'],
     package_dir={"": "src"},
-    install_requires=['numpy', 'pytest', 'scipy', 'xspline'],
+    install_requires=['numpy', 'pytest', 'scipy', 'xspline', 'pandas'],
     zip_safe=False
 )

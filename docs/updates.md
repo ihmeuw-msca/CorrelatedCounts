@@ -1,5 +1,9 @@
 # Release Notes
 
+## March XX, 2020 (v0.0.2)
+- *Feature*: Added a new functionality to run models (see [here](code.md#easy-model-launching))
+- *Feature*: If you use the new functionality above, you can do a data bootstrap to produce uncertainty
+
 ## March 9, 2020 (v0.0.1)
 - *Feature*: Added a logistic regression model, see [model specification](models.md#logistic-model)
 - *Bugfix*: Models with only one outcome (when computing variance-covariance matrix,
