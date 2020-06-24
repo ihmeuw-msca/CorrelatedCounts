@@ -3,6 +3,7 @@
 import numpy as np
 import logging
 import pandas as pd
+import multiprocessing as mp
 
 from ccount.models import MODEL_DICT
 
@@ -213,15 +214,21 @@ class ModelRun:
             LOG.info("Bootstrapping Data.")
             self.bootstrap_data()
 
-    def run(self):
+    def run(self, pools=1):
         """
         Runs the model(s).
         """
         LOG.info("Optimizing main model.")
         self.optimize(model=self.model)
-        for i, mod in enumerate(self.models):
-            LOG.info(f"Optimizing bootstrap model {i}.")
-            self.optimize(model=self.models[i])
+
+        if pools > 1:
+            pool = mp.Pool(pools)
+            self.models = pool.map(self.optimize, self.models)
+            pool.close()
+        else:
+            for i, mod in enumerate(self.models):
+                LOG.info(f"Optimizing bootstrap model {i}.")
+                self.optimize(model=self.models[i])
 
     def predict(self, alpha=0.05):
         """
@@ -284,6 +291,7 @@ class ModelRun:
             optimize_beta=self.optimize_beta, optimize_U=self.optimize_U,
             compute_D=self.compute_D
         )
+        return model
 
     def predictions(self, model):
         """
