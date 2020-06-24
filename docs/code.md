@@ -146,7 +146,15 @@ model = ModelRun(training_df, prediction_df, bootstraps=None, **kwargs)
 
 When you initialize the `ModelRun`, it will set up your main model and then each of the models that will
 be used for the data bootstraps (see [here](methods.md#data-bootstrap) for a description of the data bootstrap method).
-To fit the model, use the function `ModelRun.run()`. To make predictions, use the function `ModelRun.predict(alpha=0.05)`, where
+To fit the model, use the function `ModelRun.run()`. If you are using the boostrap functionality,
+you can fit the model for each bootstrapped dataset in parallel with multiprocessing pools
+ by passing a number of pools to `run`, like
+
+```
+model.run(pools=5)
+```
+
+To make predictions, use the function `ModelRun.predict(alpha=0.05)`, where
 `alpha` corresponds to a `1 - alpha` confidence level (e.g. 95% confidence interval). There is no need to pass
 additional arguments to the `run()` and `predict()` functions because all information about the optimization and 
 prediction data frame was passed in to the `ModelRun` `**kwargs**`.
