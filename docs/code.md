@@ -159,3 +159,27 @@ To make predictions, use the function `ModelRun.predict(alpha=0.05)`, where
 additional arguments to the `run()` and `predict()` functions because all information about the optimization and 
 prediction data frame was passed in to the `ModelRun` `**kwargs**`.
 
+### Bootstrap Data
+
+If you pass individual-record data, you can use the built-in bootstrap function for `ModelRun`.
+However, if you have grouped data, you should use the helper function `ccount.processing.resample_data`
+to resample your data based on the observed probability of having the outcome. The data
+needs to be structured with some id columns, a size column representing the count,
+and an outcome column of 1's and 0's corresponding to that count. The
+`resample_data` function will return a list of data frames as long 
+as the number of resamples you requested. An example is below.
+
+```python
+import pandas as pd
+import numpy as np
+from ccount.processing import resample_data
+df = pd.DataFrame({
+    'group': np.repeat([1, 2, 3, 4, 5], repeats=2),
+    'outcome': np.tile([0, 1], reps=5),
+    'size': np.random.randint(low=10, high=20, size=10)
+})
+data_frames = resample_data(df=df, outcome_col='outcome', id_cols=['group'], size_col='size', num_samples=10)
+```
+
+You can then pass this new `data_frames` list of data frames to the `ModelRun` function
+as the `boostrap_dfs` argument in the init.

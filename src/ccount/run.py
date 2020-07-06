@@ -3,6 +3,7 @@
 import numpy as np
 import logging
 import pandas as pd
+from typing import Optional, List
 import multiprocessing as mp
 
 from ccount.models import MODEL_DICT
@@ -170,12 +171,13 @@ def get_predictions_from_df(model, df,
 
 
 class ModelRun:
-    def __init__(self, model_type, training_df, prediction_df,
+    def __init__(self, model_type: str, training_df: pd.DataFrame, prediction_df: pd.DataFrame,
                  outcome_variables, fixed_effects, random_effect,
                  spline=None, offset=None, weight=None,
-                 max_iters=100, max_beta_iters=10, max_U_iters=10, rel_tol=None,
-                 optimize_beta=True, optimize_U=True, compute_D=True,
-                 bootstraps=None):
+                 max_iters: int = 100, max_beta_iters: int = 10, max_U_iters: int = 10,
+                 rel_tol: Optional[float] = None,
+                 optimize_beta: bool = True, optimize_U: bool = True, compute_D: bool = True,
+                 bootstraps: int = None, bootstrap_dfs: List[pd.DataFrame] = None):
 
         self.model_type = model_type
         self.training_df = training_df
@@ -197,6 +199,12 @@ class ModelRun:
         self.compute_D = compute_D
 
         self.bootstraps = bootstraps
+        self.bootstrap_dfs = bootstrap_dfs
+        if self.bootstraps is None and self.bootstrap_dfs is not None:
+            self.bootstraps = len(self.bootstrap_dfs)
+        if self.bootstrap_dfs is not None:
+            if len(self.bootstrap_dfs) != self.bootstraps:
+                raise RuntimeError("Check the number of bootstraps -- needs to be the same as the bootstrapped data.")
 
         self.model = None
         self.draws = None
@@ -212,7 +220,7 @@ class ModelRun:
         self.model = self.convert(df=self.training_df)
         if self.bootstraps is not None:
             LOG.info("Bootstrapping Data.")
-            self.bootstrap_data()
+            self.bootstrap_data(bootstrap_dfs=self.bootstrap_dfs)
 
     def run(self, pools=1):
         """
@@ -310,16 +318,19 @@ class ModelRun:
             offset=self.offset,
         )
 
-    def bootstrap_data(self):
+    def bootstrap_data(self, bootstrap_dfs: Optional[List[pd.DataFrame]] = None):
         """
         Bootstraps the data with self.bootstraps samples.
         """
         for i in range(self.bootstraps):
-            df_i = self.training_df.groupby(
-                self.random_effect, group_keys=False
-            ).apply(
-                lambda x: x.sample(len(x), replace=True)
-            )
+            if bootstrap_dfs is None:
+                df_i = self.training_df.groupby(
+                    self.random_effect, group_keys=False
+                ).apply(
+                    lambda x: x.sample(len(x), replace=True)
+                )
+            else:
+                df_i = bootstrap_dfs[i].copy()
             self.models.append(self.convert(df=df_i))
 
     def summarize(self, **kwargs):
