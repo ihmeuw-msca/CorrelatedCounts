@@ -269,6 +269,19 @@
     Easy Model Launching
   </a>
   
+    <nav class="md-nav" aria-label="Easy Model Launching">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#bootstrap-data" class="md-nav__link">
+    Bootstrap Data
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
     </ul>
@@ -360,6 +373,19 @@
   <a href="#easy-model-launching" class="md-nav__link">
     Easy Model Launching
   </a>
+  
+    <nav class="md-nav" aria-label="Easy Model Launching">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#bootstrap-data" class="md-nav__link">
+    Bootstrap Data
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -520,6 +546,28 @@ you can fit the model for each bootstrapped dataset in parallel with multiproces
 <code>alpha</code> corresponds to a <code>1 - alpha</code> confidence level (e.g. 95% confidence interval). There is no need to pass
 additional arguments to the <code>run()</code> and <code>predict()</code> functions because all information about the optimization and 
 prediction data frame was passed in to the <code>ModelRun</code> <code>**kwargs**</code>.</p>
+<h3 id="bootstrap-data">Bootstrap Data</h3>
+<p>If you pass individual-record data, you can use the built-in bootstrap function for <code>ModelRun</code>.
+However, if you have grouped data, you should use the helper function <code>ccount.processing.resample_data</code>
+to resample your data based on the observed probability of having the outcome. The data
+needs to be structured with some id columns, a size column representing the count,
+and an outcome column of 1's and 0's corresponding to that count. The
+<code>resample_data</code> function will return a list of data frames as long 
+as the number of resamples you requested. An example is below.</p>
+<div class="codehilite"><pre><span></span><code><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">ccount.processing</span> <span class="kn">import</span> <span class="n">resample_data</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
+    <span class="s1">&#39;group&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">],</span> <span class="n">repeats</span><span class="o">=</span><span class="mi">2</span><span class="p">),</span>
+    <span class="s1">&#39;outcome&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">reps</span><span class="o">=</span><span class="mi">5</span><span class="p">),</span>
+    <span class="s1">&#39;size&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="n">low</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">high</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<span class="p">})</span>
+<span class="n">data_frames</span> <span class="o">=</span> <span class="n">resample_data</span><span class="p">(</span><span class="n">df</span><span class="o">=</span><span class="n">df</span><span class="p">,</span> <span class="n">outcome_col</span><span class="o">=</span><span class="s1">&#39;outcome&#39;</span><span class="p">,</span> <span class="n">id_cols</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;group&#39;</span><span class="p">],</span> <span class="n">size_col</span><span class="o">=</span><span class="s1">&#39;size&#39;</span><span class="p">,</span> <span class="n">num_samples</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+</code></pre></div>
+
+
+<p>You can then pass this new <code>data_frames</code> list of data frames to the <code>ModelRun</code> function
+as the <code>boostrap_dfs</code> argument in the init.</p>
                 
               
               
